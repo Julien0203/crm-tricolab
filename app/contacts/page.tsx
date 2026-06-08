@@ -673,48 +673,58 @@ export default function ContactsPage() {
           <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px' }}>
             {activeTab === 'info' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {/* Contact: always shown */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                  {selected.phone && (
-                    <a href={`tel:${selected.phone}`} style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 12 }}>
-                      <Phone size={13} color="#6366f1" />{selected.phone}
-                    </a>
-                  )}
-                  {selected.email && (
-                    <a href={`mailto:${selected.email}`} style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 12 }}>
-                      <Mail size={13} color="#6366f1" />{selected.email}
-                    </a>
-                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+                    <Phone size={13} color={selected.phone ? '#6366f1' : 'var(--text-subtle)'} style={{ flexShrink: 0 }} />
+                    {selected.phone
+                      ? <a href={`tel:${selected.phone}`} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>{selected.phone}</a>
+                      : <span style={{ color: 'var(--text-subtle)', fontStyle: 'italic' }}>Non renseigné</span>}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+                    <Mail size={13} color={selected.email ? '#6366f1' : 'var(--text-subtle)'} style={{ flexShrink: 0 }} />
+                    {selected.email
+                      ? <a href={`mailto:${selected.email}`} style={{ color: 'var(--text-secondary)', textDecoration: 'none', wordBreak: 'break-all' }}>{selected.email}</a>
+                      : <span style={{ color: 'var(--text-subtle)', fontStyle: 'italic' }}>Non renseigné</span>}
+                  </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-secondary)', fontSize: 12 }}>
-                    <MapPin size={13} color="#6366f1" />{selected.city || 'Ville non renseignée'}
+                    <MapPin size={13} color="#6366f1" style={{ flexShrink: 0 }} />{selected.city || '—'}
                   </div>
                 </div>
+
+                {/* Qualification grid: 3 rows × 2 cols, toujours visible */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                  {[
-                    { label: 'Secteur', value: selected.sectorLabel || SECTOR_LABELS[selected.sector] },
-                    { label: 'Site existant', value: selected.siteUrl || SITE_STATUS_LABELS[selected.siteStatus] },
-                  ].map(({ label, value }) => (
-                    <div key={label} style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
-                      <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>{label}</div>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', wordBreak: 'break-all' }}>{value}</div>
-                    </div>
-                  ))}
-                </div>
-                {(selected.score !== undefined || selected.niveau) && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                    {selected.score !== undefined && (
-                      <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
-                        <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Score IA</div>
-                        <div style={{ fontSize: 16, fontWeight: 700, color: selected.score >= 75 ? '#10b981' : selected.score >= 50 ? '#f59e0b' : '#ef4444' }}>{selected.score}<span style={{ fontSize: 10, fontWeight: 400, color: 'var(--text-muted)' }}>/100</span></div>
-                      </div>
-                    )}
-                    {selected.niveau && (
-                      <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
-                        <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Niveau</div>
-                        <div style={{ fontSize: 12, fontWeight: 700, color: selected.niveau === 'CHAUD' ? '#ef4444' : selected.niveau === 'TIÈDE' ? '#f59e0b' : '#6366f1' }}>{selected.niveau}</div>
-                      </div>
-                    )}
+                  <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Secteur</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', wordBreak: 'break-word' }}>{selected.sectorLabel || SECTOR_LABELS[selected.sector]}</div>
                   </div>
-                )}
+                  <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Site existant</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', wordBreak: 'break-all' }}>{selected.siteUrl || SITE_STATUS_LABELS[selected.siteStatus]}</div>
+                  </div>
+                  <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Âge</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: selected.age ? 'var(--text-primary)' : 'var(--text-subtle)' }}>{selected.age ? `${selected.age} ans` : '—'}</div>
+                  </div>
+                  <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Score IA</div>
+                    {selected.score !== undefined
+                      ? <div style={{ fontSize: 16, fontWeight: 700, color: selected.score >= 75 ? '#10b981' : selected.score >= 50 ? '#f59e0b' : '#ef4444' }}>{selected.score}<span style={{ fontSize: 10, fontWeight: 400, color: 'var(--text-muted)' }}>/100</span></div>
+                      : <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-subtle)' }}>—</div>}
+                  </div>
+                  <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Niveau</div>
+                    {selected.niveau
+                      ? <div style={{ fontSize: 12, fontWeight: 700, color: selected.niveau === 'CHAUD' ? '#ef4444' : selected.niveau === 'TIÈDE' ? '#f59e0b' : '#6366f1' }}>{selected.niveau}</div>
+                      : <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-subtle)' }}>—</div>}
+                  </div>
+                  <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Lot semaine</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: selected.weekBatch ? 'var(--text-primary)' : 'var(--text-subtle)' }}>{selected.weekBatch || '—'}</div>
+                  </div>
+                </div>
+
+                {/* IA Insights: uniquement si données présentes */}
                 {selected.buyingSignals && (
                   <div>
                     <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Signaux d&apos;Achat</div>
@@ -733,15 +743,18 @@ export default function ContactsPage() {
                     <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.22)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selected.recommendedAction}</div>
                   </div>
                 )}
-                {selected.callNotes && (
-                  <div>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Notes appel</div>
-                    <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selected.callNotes}</div>
+
+                {/* Notes appel: toujours visible */}
+                <div>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Notes appel</div>
+                  <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: selected.callNotes ? 'var(--text-secondary)' : 'var(--text-subtle)', lineHeight: 1.6, fontStyle: selected.callNotes ? 'normal' : 'italic' }}>
+                    {selected.callNotes || 'Aucune note d\'appel'}
                   </div>
-                )}
+                </div>
+
                 {selected.notes && (
                   <div>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Notes</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Notes internes</div>
                     <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selected.notes}</div>
                   </div>
                 )}
@@ -768,9 +781,8 @@ export default function ContactsPage() {
                     </div>
                   );
                 })()}
-                <div style={{ fontSize: 10, color: 'var(--text-subtle)', marginTop: 4, display: 'flex', gap: 10 }}>
-                  <span>Ajouté le {format(new Date(selected.createdAt), 'd MMM yyyy', { locale: fr })}</span>
-                  {selected.age && <span>· {selected.age} ans</span>}
+                <div style={{ fontSize: 10, color: 'var(--text-subtle)', marginTop: 4 }}>
+                  Ajouté le {format(new Date(selected.createdAt), 'd MMM yyyy', { locale: fr })}
                 </div>
               </div>
             )}
