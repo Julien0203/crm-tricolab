@@ -1,128 +1,346 @@
-import { Contact, Deal, Activity, CRMStore } from './types';
+import { Contact, Deal, Activity, CRMStore, COMMISSION_PER_DEAL, CRMSettings, DEFAULT_SETTINGS, CRMScripts, Task } from './types';
 
-const STORAGE_KEY = 'thomas-crm-data';
+const STORAGE_KEY = 'thomas-crm-data-v2'; // v2: Tricolab data model
 
+// Batch S22-2026 reçu de Clara le lundi 26 mai 2026
+// Batch S23-2026 reçu de Clara le lundi 2 juin 2026
 const defaultData: CRMStore = {
   contacts: [
     {
       id: '1',
-      firstName: 'Sophie',
-      lastName: 'Martin',
-      company: 'TechCorp SAS',
-      email: 'sophie.martin@techcorp.fr',
-      phone: '06 12 34 56 78',
-      tags: ['prospect'],
-      notes: 'Intéressée par notre offre premium',
-      createdAt: new Date(Date.now() - 7 * 86400000).toISOString(),
-      updatedAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+      firstName: 'Karim',
+      lastName: 'Benali',
+      company: 'Benali Plomberie',
+      sector: 'batiment',
+      city: 'Lyon 7e',
+      email: 'k.benali@benali-plomberie.fr',
+      phone: '06 23 45 67 89',
+      siteStatus: 'vieux',
+      prospectStatus: 'interesse',
+      weekBatch: 'S22-2026',
+      callNotes: 'Très ouvert, veut moderniser son image. Site fait en 2018. Rappel R2 jeudi.',
+      notes: '',
+      source: 'appel_froid',
+      createdAt: new Date('2026-05-26').toISOString(),
+      updatedAt: new Date('2026-05-28').toISOString(),
     },
     {
       id: '2',
-      firstName: 'Marc',
-      lastName: 'Dubois',
-      company: 'Dubois & Associés',
-      email: 'marc.dubois@dubois-asso.fr',
-      phone: '07 98 76 54 32',
-      tags: ['client'],
-      notes: 'Client fidèle depuis 2 ans',
-      createdAt: new Date(Date.now() - 30 * 86400000).toISOString(),
-      updatedAt: new Date(Date.now() - 1 * 86400000).toISOString(),
+      firstName: 'Nathalie',
+      lastName: 'Rousseau',
+      company: 'Cabinet Rousseau',
+      sector: 'profession-liberale',
+      city: 'Grenoble',
+      email: 'n.rousseau@cabinet-rousseau.fr',
+      phone: '04 76 12 34 56',
+      siteStatus: 'aucun',
+      prospectStatus: 'r2-planifie',
+      weekBatch: 'S22-2026',
+      callNotes: 'Comptable indépendante, pas de site du tout. R2 planifié lundi 2 juin à 11h.',
+      notes: '',
+      source: 'appel_froid',
+      createdAt: new Date('2026-05-26').toISOString(),
+      updatedAt: new Date('2026-05-29').toISOString(),
     },
     {
       id: '3',
-      firstName: 'Laura',
-      lastName: 'Petit',
-      company: 'Petit Design Studio',
-      email: 'laura@petitdesign.fr',
-      phone: '06 55 44 33 22',
-      tags: ['prospect'],
-      notes: 'RDV à planifier semaine prochaine',
-      createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
-      updatedAt: new Date(Date.now() - 3 * 86400000).toISOString(),
+      firstName: 'Julien',
+      lastName: 'Mercier',
+      company: 'Le Refuge — Brasserie',
+      sector: 'restauration',
+      city: 'Annecy',
+      email: 'contact@lerefuge-annecy.fr',
+      phone: '04 50 23 11 98',
+      siteStatus: 'vieux',
+      prospectStatus: 'chaud',
+      weekBatch: 'S22-2026',
+      callNotes: 'Très motivé. Son site est honteux selon lui. Devis déjà évoqué, veut des exemples de réalisations.',
+      notes: '',
+      source: 'appel_froid',
+      createdAt: new Date('2026-05-26').toISOString(),
+      updatedAt: new Date('2026-05-30').toISOString(),
+    },
+    {
+      id: '4',
+      firstName: 'Patricia',
+      lastName: 'Lévêque',
+      company: 'Élec Pro 69',
+      sector: 'batiment',
+      city: 'Villeurbanne',
+      email: 'patricia@elecpro69.fr',
+      phone: '06 78 90 12 34',
+      siteStatus: 'aucun',
+      prospectStatus: 'injoignable',
+      weekBatch: 'S22-2026',
+      callNotes: 'Messagerie à chaque essai. 3 tentatives. Réessayer semaine prochaine.',
+      notes: '',
+      source: 'appel_froid',
+      createdAt: new Date('2026-05-26').toISOString(),
+      updatedAt: new Date('2026-05-27').toISOString(),
+    },
+    {
+      id: '5',
+      firstName: 'Sébastien',
+      lastName: 'Fontaine',
+      company: 'Coach Fontaine Performance',
+      sector: 'coach-consultant',
+      city: 'Chambéry',
+      email: 's.fontaine@coachfontaine.fr',
+      phone: '06 11 22 33 44',
+      siteStatus: 'existant',
+      prospectStatus: 'non-interesse',
+      weekBatch: 'S22-2026',
+      callNotes: 'Déjà un prestataire web, satisfait. Pas intéressé pour le moment.',
+      notes: '',
+      source: 'appel_froid',
+      createdAt: new Date('2026-05-26').toISOString(),
+      updatedAt: new Date('2026-05-26').toISOString(),
+    },
+    {
+      id: '6',
+      firstName: 'Ahmed',
+      lastName: 'Ouali',
+      company: 'Maçonnerie Ouali & Fils',
+      sector: 'batiment',
+      city: 'Saint-Étienne',
+      email: 'contact@maconnerie-ouali.fr',
+      phone: '07 55 66 77 88',
+      siteStatus: 'vieux',
+      prospectStatus: 'a-appeler',
+      weekBatch: 'S23-2026',
+      callNotes: '',
+      notes: '',
+      source: 'appel_froid',
+      createdAt: new Date('2026-06-02').toISOString(),
+      updatedAt: new Date('2026-06-02').toISOString(),
+    },
+    {
+      id: '7',
+      firstName: 'Claire',
+      lastName: 'Moreau',
+      company: 'Ostéo Claire Moreau',
+      sector: 'profession-liberale',
+      city: 'Bourg-en-Bresse',
+      email: 'claire.moreau.osteo@gmail.com',
+      phone: '06 44 55 66 77',
+      siteStatus: 'aucun',
+      prospectStatus: 'a-appeler',
+      weekBatch: 'S23-2026',
+      callNotes: '',
+      notes: '',
+      source: 'appel_froid',
+      createdAt: new Date('2026-06-02').toISOString(),
+      updatedAt: new Date('2026-06-02').toISOString(),
+    },
+    {
+      id: '8',
+      firstName: 'Thomas',
+      lastName: 'Garnier',
+      company: 'Boucherie Garnier',
+      sector: 'commerce',
+      city: 'Valence',
+      email: 'boucherie.garnier@wanadoo.fr',
+      phone: '04 75 43 21 09',
+      siteStatus: 'vieux',
+      prospectStatus: 'a-appeler',
+      weekBatch: 'S23-2026',
+      callNotes: '',
+      notes: '',
+      source: 'appel_froid',
+      createdAt: new Date('2026-06-02').toISOString(),
+      updatedAt: new Date('2026-06-02').toISOString(),
+    },
+    {
+      id: '9',
+      firstName: 'Marie',
+      lastName: 'Delacroix',
+      company: 'Institut Beauté Marie D.',
+      sector: 'commerce',
+      city: 'Lyon 3e',
+      email: 'marie.delacroix.beaute@gmail.com',
+      phone: '06 87 65 43 21',
+      siteStatus: 'aucun',
+      prospectStatus: 'interesse',
+      weekBatch: 'S23-2026',
+      callNotes: 'Appelée ce matin. Très intéressée, veut un site vitrine + Google. Rappel jeudi 5 juin.',
+      notes: '',
+      source: 'appel_froid',
+      createdAt: new Date('2026-06-02').toISOString(),
+      updatedAt: new Date('2026-06-03').toISOString(),
+    },
+    {
+      id: '10',
+      firstName: 'Pascal',
+      lastName: 'Vidal',
+      company: 'Menuiserie Vidal',
+      sector: 'batiment',
+      city: 'Clermont-Ferrand',
+      email: 'pascal.vidal@menuiserie-vidal.fr',
+      phone: '06 33 44 55 66',
+      siteStatus: 'vieux',
+      prospectStatus: 'a-appeler',
+      weekBatch: 'S23-2026',
+      callNotes: '',
+      notes: '',
+      source: 'appel_froid',
+      createdAt: new Date('2026-06-02').toISOString(),
+      updatedAt: new Date('2026-06-02').toISOString(),
     },
   ],
   deals: [
     {
       id: '1',
-      title: 'Contrat annuel TechCorp',
-      contactId: '1',
-      stage: 'proposition',
-      value: 12000,
-      probability: 60,
-      notes: 'Proposition envoyée le 28/05',
-      expectedCloseDate: new Date(Date.now() + 14 * 86400000).toISOString(),
-      createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
-      updatedAt: new Date(Date.now() - 1 * 86400000).toISOString(),
+      title: 'Site vitrine — Le Refuge Brasserie',
+      contactId: '3',
+      stage: 'r2',
+      value: 1920,
+      commission: COMMISSION_PER_DEAL,
+      probability: 75,
+      notes: 'Très chaud. Envoyer exemples de réas restaurants avant R2.',
+      expectedCloseDate: new Date('2026-06-10').toISOString(),
+      createdAt: new Date('2026-05-28').toISOString(),
+      updatedAt: new Date('2026-05-30').toISOString(),
     },
     {
       id: '2',
-      title: 'Renouvellement Dubois',
+      title: 'Site vitrine — Cabinet Rousseau',
       contactId: '2',
-      stage: 'negociation',
-      value: 8500,
-      probability: 80,
-      notes: 'Négociation en cours sur le tarif',
-      expectedCloseDate: new Date(Date.now() + 7 * 86400000).toISOString(),
-      createdAt: new Date(Date.now() - 10 * 86400000).toISOString(),
-      updatedAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+      stage: 'r2',
+      value: 1920,
+      commission: COMMISSION_PER_DEAL,
+      probability: 60,
+      notes: 'Comptable sans site. R2 lundi 2 juin 11h.',
+      expectedCloseDate: new Date('2026-06-13').toISOString(),
+      createdAt: new Date('2026-05-27').toISOString(),
+      updatedAt: new Date('2026-05-29').toISOString(),
     },
     {
       id: '3',
-      title: 'Pack démarrage Petit Design',
-      contactId: '3',
-      stage: 'qualification',
-      value: 2400,
-      probability: 40,
-      notes: 'Besoin de mieux qualifier',
-      expectedCloseDate: new Date(Date.now() + 21 * 86400000).toISOString(),
-      createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
-      updatedAt: new Date(Date.now() - 3 * 86400000).toISOString(),
+      title: 'Site vitrine — Benali Plomberie',
+      contactId: '1',
+      stage: 'devis-envoye',
+      value: 1920,
+      commission: COMMISSION_PER_DEAL,
+      probability: 50,
+      notes: 'Devis envoyé le 30 mai. Relance prévue vendredi.',
+      expectedCloseDate: new Date('2026-06-07').toISOString(),
+      createdAt: new Date('2026-05-26').toISOString(),
+      updatedAt: new Date('2026-05-30').toISOString(),
     },
     {
       id: '4',
-      title: 'Projet web Dubois',
-      contactId: '2',
-      stage: 'gagne',
-      value: 5000,
-      probability: 100,
-      notes: 'Signé !',
-      expectedCloseDate: new Date(Date.now() - 5 * 86400000).toISOString(),
-      createdAt: new Date(Date.now() - 20 * 86400000).toISOString(),
-      updatedAt: new Date(Date.now() - 5 * 86400000).toISOString(),
+      title: 'Site vitrine — Institut Marie D.',
+      contactId: '9',
+      stage: 'r1',
+      value: 1920,
+      commission: COMMISSION_PER_DEAL,
+      probability: 40,
+      notes: 'Premier contact positif, rappel R2 jeudi.',
+      expectedCloseDate: new Date('2026-06-20').toISOString(),
+      createdAt: new Date('2026-06-03').toISOString(),
+      updatedAt: new Date('2026-06-03').toISOString(),
+    },
+    {
+      id: '5',
+      title: 'Site vitrine — Fontaine Performance',
+      contactId: '5',
+      stage: 'perdu',
+      value: 1920,
+      commission: COMMISSION_PER_DEAL,
+      probability: 0,
+      notes: '',
+      lostReason: 'concurrent',
+      lostNote: 'Déjà prestataire web en place, satisfait.',
+      expectedCloseDate: new Date('2026-05-30').toISOString(),
+      createdAt: new Date('2026-05-26').toISOString(),
+      updatedAt: new Date('2026-05-26').toISOString(),
     },
   ],
   activities: [
     {
       id: '1',
       type: 'appel',
-      contactId: '1',
+      contactId: '3',
       dealId: '1',
-      title: 'Appel suivi proposition',
-      notes: 'Sophie souhaite une réunion en visio',
-      date: new Date(Date.now() + 2 * 86400000).toISOString(),
+      title: 'R2 — Le Refuge Brasserie',
+      notes: 'Appel R2 avec Julien Mercier. Préparer exemples réalisations restaurants.',
+      date: new Date('2026-06-04T10:00:00').toISOString(),
       completed: false,
-      createdAt: new Date(Date.now() - 1 * 86400000).toISOString(),
+      createdAt: new Date('2026-05-30').toISOString(),
     },
     {
       id: '2',
-      type: 'rdv',
+      type: 'appel',
       contactId: '2',
       dealId: '2',
-      title: 'RDV finalisation contrat',
-      notes: 'Bureaux de Marc à 14h',
-      date: new Date(Date.now() + 5 * 86400000).toISOString(),
-      completed: false,
-      createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+      title: 'R2 — Cabinet Rousseau',
+      notes: 'R2 planifié. Nathalie attend des exemples secteur profession libérale.',
+      date: new Date('2026-06-02T11:00:00').toISOString(),
+      completed: true,
+      createdAt: new Date('2026-05-29').toISOString(),
     },
     {
       id: '3',
       type: 'email',
-      contactId: '3',
-      title: 'Envoi documentation',
-      notes: 'Documentation produit envoyée',
-      date: new Date(Date.now() - 1 * 86400000).toISOString(),
+      contactId: '1',
+      dealId: '3',
+      title: 'Relance devis — Benali Plomberie',
+      notes: 'Devis envoyé le 30 mai, pas de réponse. Relancer par email + appel.',
+      date: new Date('2026-06-06T09:00:00').toISOString(),
+      completed: false,
+      createdAt: new Date('2026-06-03').toISOString(),
+    },
+    {
+      id: '4',
+      type: 'appel',
+      contactId: '9',
+      dealId: '4',
+      title: 'R2 — Institut Marie Delacroix',
+      notes: 'Rappel R2 suite au bon premier contact ce matin.',
+      date: new Date('2026-06-05T14:00:00').toISOString(),
+      completed: false,
+      createdAt: new Date('2026-06-03').toISOString(),
+    },
+    {
+      id: '5',
+      type: 'appel',
+      contactId: '4',
+      title: 'Relance Patricia — Élec Pro 69',
+      notes: 'Injoignable 3×. Réessayer à une heure différente.',
+      date: new Date('2026-06-04T16:00:00').toISOString(),
+      completed: false,
+      createdAt: new Date('2026-06-03').toISOString(),
+    },
+    {
+      id: '6',
+      type: 'appel',
+      contactId: '6',
+      title: 'R1 — Maçonnerie Ouali',
+      notes: 'Nouveau prospect S23. Premier appel à passer.',
+      date: new Date('2026-06-03T11:00:00').toISOString(),
+      completed: false,
+      createdAt: new Date('2026-06-02').toISOString(),
+    },
+    {
+      id: '7',
+      type: 'appel',
+      contactId: '7',
+      title: 'R1 — Ostéo Claire Moreau',
+      notes: 'Nouveau prospect S23. Premier appel à passer.',
+      date: new Date('2026-06-03T15:00:00').toISOString(),
+      completed: false,
+      createdAt: new Date('2026-06-02').toISOString(),
+    },
+    {
+      id: '8',
+      type: 'appel',
+      contactId: '1',
+      dealId: '3',
+      title: 'R1 — Benali Plomberie',
+      notes: 'Premier appel réussi. Intéressé, site 2018 à refaire.',
+      date: new Date('2026-05-27T10:30:00').toISOString(),
       completed: true,
-      createdAt: new Date(Date.now() - 1 * 86400000).toISOString(),
+      createdAt: new Date('2026-05-27').toISOString(),
     },
   ],
 };
@@ -153,6 +371,20 @@ export function getContacts(): Contact[] {
 
 export function getContact(id: string): Contact | undefined {
   return getStore().contacts.find(c => c.id === id);
+}
+
+export function saveContacts(contacts: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>[]): Contact[] {
+  const store = getStore();
+  const now = new Date().toISOString();
+  const newContacts: Contact[] = contacts.map((c, i) => ({
+    ...c,
+    id: (Date.now() + i).toString(),
+    createdAt: now,
+    updatedAt: now,
+  }));
+  store.contacts.unshift(...newContacts);
+  saveStore(store);
+  return newContacts;
 }
 
 export function saveContact(contact: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>): Contact {
@@ -248,4 +480,75 @@ export function deleteActivity(id: string) {
   const store = getStore();
   store.activities = store.activities.filter(a => a.id !== id);
   saveStore(store);
+}
+
+// Helper: reset localStorage to fresh default data
+export function resetStore() {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
+}
+
+// Settings
+const SETTINGS_KEY = 'thomas-crm-settings-v1';
+
+export function getSettings(): CRMSettings {
+  if (typeof window === 'undefined') return DEFAULT_SETTINGS;
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    return raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : DEFAULT_SETTINGS;
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
+
+export function saveSettings(s: CRMSettings): void {
+  if (typeof window !== 'undefined') localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+}
+
+// Scripts
+const SCRIPTS_KEY = 'thomas-crm-scripts-v1';
+
+export function getScripts(): CRMScripts | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(SCRIPTS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveScripts(s: CRMScripts): void {
+  if (typeof window !== 'undefined') localStorage.setItem(SCRIPTS_KEY, JSON.stringify(s));
+}
+
+// Tasks
+const TASKS_KEY = 'thomas-crm-taches-v1';
+
+export function getTasks(): Task[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(TASKS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveTask(text: string): Task {
+  const tasks = getTasks();
+  const task: Task = { id: Date.now().toString(), text, completed: false, createdAt: new Date().toISOString() };
+  tasks.unshift(task);
+  localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+  return task;
+}
+
+export function updateTask(id: string, updates: Partial<Task>): void {
+  const tasks = getTasks().map(t => t.id === id ? { ...t, ...updates } : t);
+  localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+}
+
+export function deleteTask(id: string): void {
+  const tasks = getTasks().filter(t => t.id !== id);
+  localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Sidebar from "@/components/layout/Sidebar";
+import { ThemeProvider } from "@/app/context/ThemeContext";
 
 export const metadata: Metadata = {
   title: "Thomas CRM",
@@ -13,12 +14,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" style={{ background: '#0f1117' }}>
-      <body style={{ margin: 0, minHeight: '100vh', display: 'flex', background: '#0f1117' }}>
-        <Sidebar />
-        <main style={{ marginLeft: 220, flex: 1, minHeight: '100vh', padding: '32px 32px', background: '#0f1117' }}>
-          {children}
-        </main>
+    <html lang="fr">
+      <body style={{ margin: 0, minHeight: '100vh' }}>
+        <ThemeProvider>
+          <Sidebar />
+          <main className="layout-main">
+            {children}
+          </main>
+        </ThemeProvider>
       </body>
     </html>
   );

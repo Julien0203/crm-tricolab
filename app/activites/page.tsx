@@ -12,7 +12,7 @@ const ACTIVITY_CONFIG: Record<ActivityType, { label: string; icon: React.ReactNo
   email:  { label: 'Email',    icon: <Mail size={14} />,         color: '#6366f1' },
   rdv:    { label: 'RDV',      icon: <Calendar size={14} />,     color: '#f59e0b' },
   tache:  { label: 'Tâche',    icon: <CheckCircle2 size={14} />, color: '#8b5cf6' },
-  note:   { label: 'Note',     icon: <StickyNote size={14} />,   color: '#64748b' },
+  note:   { label: 'Note',     icon: <StickyNote size={14} />,   color: 'var(--text-muted)' },
 };
 
 const ALL_TYPES: ActivityType[] = ['appel', 'email', 'rdv', 'tache', 'note'];
@@ -67,7 +67,7 @@ export default function ActivitesPage() {
     reload();
   }
 
-  const inp: React.CSSProperties = { width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #2a3550', background: '#0f1117', color: '#f1f5f9', fontSize: 14, outline: 'none' };
+  const inp: React.CSSProperties = { width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--glass-bg)', backdropFilter: 'blur(20px) saturate(180%)', color: 'var(--text-primary)', fontSize: 14, outline: 'none' };
 
   const todoCount = activities.filter(a => !a.completed).length;
   const doneCount = activities.filter(a => a.completed).length;
@@ -76,8 +76,8 @@ export default function ActivitesPage() {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>Activités</h1>
-          <p style={{ color: '#64748b', margin: '2px 0 0', fontSize: 13 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Activités</h1>
+          <p style={{ color: 'var(--text-muted)', margin: '2px 0 0', fontSize: 13 }}>
             {todoCount} à faire · {doneCount} terminées
           </p>
         </div>
@@ -96,8 +96,8 @@ export default function ActivitesPage() {
         ].map(({ key, label }) => (
           <button key={key} onClick={() => setFilter(key as typeof filter)} style={{
             padding: '7px 13px', borderRadius: 8, border: '1px solid',
-            borderColor: filter === key ? '#6366f1' : '#1e2740',
-            background: filter === key ? '#6366f120' : 'transparent',
+            borderColor: filter === key ? '#6366f1' : 'var(--border-subtle)',
+            background: filter === key ? 'rgba(99,102,241,0.13)' : 'transparent',
             color: filter === key ? '#818cf8' : '#64748b',
             cursor: 'pointer', fontSize: 12, fontWeight: 500,
           }}>
@@ -117,7 +117,9 @@ export default function ActivitesPage() {
           return (
             <div key={activity.id} style={{
               display: 'flex', alignItems: 'center', gap: 14,
-              background: '#13161f', border: `1px solid ${isPastDue ? '#ef444430' : '#1e2740'}`,
+              background: 'var(--glass-bg)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              border: `1px solid ${isPastDue ? 'rgba(239,68,68,0.35)' : 'var(--glass-border)'}`,
+              boxShadow: isPastDue ? '0 0 0 1px rgba(239,68,68,0.1)' : 'none',
               borderRadius: 10, padding: '14px 16px',
               opacity: activity.completed ? 0.6 : 1,
               transition: 'all 0.15s',
@@ -125,7 +127,7 @@ export default function ActivitesPage() {
               {/* Checkbox */}
               <button onClick={() => toggleDone(activity.id, activity.completed)} style={{
                 width: 24, height: 24, borderRadius: 6, flexShrink: 0, cursor: 'pointer',
-                border: `2px solid ${activity.completed ? '#22c55e' : '#334155'}`,
+                border: `2px solid ${activity.completed ? '#34d399' : 'rgba(255,255,255,0.25)'}`,
                 background: activity.completed ? '#22c55e' : 'transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
               }}>
@@ -143,14 +145,14 @@ export default function ActivitesPage() {
 
               {/* Content */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: activity.completed ? '#64748b' : '#f1f5f9', textDecoration: activity.completed ? 'line-through' : 'none' }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: activity.completed ? 'var(--text-subtle)' : 'var(--text-primary)', textDecoration: activity.completed ? 'line-through' : 'none' }}>
                   {activity.title}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3, flexWrap: 'wrap' }}>
-                  {contact && <span style={{ fontSize: 11, color: '#64748b' }}>{contact.firstName} {contact.lastName}</span>}
-                  {contact && deal && <span style={{ fontSize: 11, color: '#334155' }}>·</span>}
-                  {deal && <span style={{ fontSize: 11, color: '#64748b' }}>{deal.title}</span>}
-                  {activity.notes && <span style={{ fontSize: 11, color: '#475569' }}>· {activity.notes.slice(0, 60)}{activity.notes.length > 60 ? '…' : ''}</span>}
+                  {contact && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{contact.firstName} {contact.lastName}</span>}
+                  {contact && deal && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>·</span>}
+                  {deal && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{deal.title}</span>}
+                  {activity.notes && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>· {activity.notes.slice(0, 60)}{activity.notes.length > 60 ? '…' : ''}</span>}
                 </div>
               </div>
 
@@ -160,20 +162,20 @@ export default function ActivitesPage() {
                   {isPastDue && <Clock size={11} />}
                   {formatDateLabel(activity.date)}
                 </div>
-                <div style={{ fontSize: 11, color: '#475569', marginTop: 2 }}>{format(new Date(activity.date), 'HH:mm')}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{format(new Date(activity.date), 'HH:mm')}</div>
               </div>
 
               {/* Actions */}
               <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-                <button onClick={() => openEdit(activity)} style={{ padding: 6, borderRadius: 6, background: '#1e2740', border: 'none', cursor: 'pointer', color: '#94a3b8' }}><Pencil size={13} /></button>
-                <button onClick={() => { deleteActivity(activity.id); reload(); }} style={{ padding: 6, borderRadius: 6, background: '#1e2740', border: 'none', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={13} /></button>
+                <button onClick={() => openEdit(activity)} style={{ padding: 6, borderRadius: 6, background: 'var(--hover-bg)', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><Pencil size={13} /></button>
+                <button onClick={() => { deleteActivity(activity.id); reload(); }} style={{ padding: 6, borderRadius: 6, background: 'var(--hover-bg)', border: 'none', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={13} /></button>
               </div>
             </div>
           );
         })}
 
         {filtered.length === 0 && (
-          <div style={{ textAlign: 'center', padding: 60, color: '#475569' }}>
+          <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>
             <Calendar size={40} style={{ margin: '0 auto 12px', display: 'block', opacity: 0.3 }} />
             Aucune activité
           </div>
@@ -182,23 +184,23 @@ export default function ActivitesPage() {
 
       {/* Modal */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-          <div style={{ background: '#13161f', border: '1px solid #1e2740', borderRadius: 16, padding: '28px', width: 480, maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.22)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <div style={{ background: 'var(--glass-bg-solid)', backdropFilter: 'blur(60px) saturate(200%) brightness(110%)', WebkitBackdropFilter: 'blur(60px) saturate(200%) brightness(110%)', border: '1px solid var(--glass-border-med)', boxShadow: 'var(--glass-shadow-lg)', borderRadius: 18, padding: '28px', width: 480, maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#f1f5f9' }}>{editing ? 'Modifier' : 'Nouvelle activité'}</h2>
-              <button onClick={() => setShowModal(false)} style={{ background: '#1e2740', border: 'none', borderRadius: 6, cursor: 'pointer', color: '#94a3b8', padding: 6 }}><X size={15} /></button>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{editing ? 'Modifier' : 'Nouvelle activité'}</h2>
+              <button onClick={() => setShowModal(false)} style={{ background: 'var(--hover-bg)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)', padding: 6 }}><X size={15} /></button>
             </div>
 
             {/* Type selector */}
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 12, color: '#64748b', display: 'block', marginBottom: 8 }}>Type</label>
+              <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 8 }}>Type</label>
               <div style={{ display: 'flex', gap: 6 }}>
                 {ALL_TYPES.map(type => {
                   const cfg = ACTIVITY_CONFIG[type];
                   return (
                     <button key={type} onClick={() => setForm(f => ({ ...f, type }))} style={{
                       flex: 1, padding: '8px 4px', borderRadius: 8, border: '1px solid',
-                      borderColor: form.type === type ? cfg.color : '#1e2740',
+                      borderColor: form.type === type ? cfg.color : 'var(--border-subtle)',
                       background: form.type === type ? `${cfg.color}20` : 'transparent',
                       color: form.type === type ? cfg.color : '#64748b',
                       cursor: 'pointer', fontSize: 11, fontWeight: 500,
@@ -213,20 +215,20 @@ export default function ActivitesPage() {
             </div>
 
             <div style={{ marginBottom: 12 }}>
-              <label style={{ fontSize: 12, color: '#64748b', display: 'block', marginBottom: 5 }}>Titre *</label>
+              <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Titre *</label>
               <input style={inp} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Ex: Appel de suivi" />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
               <div>
-                <label style={{ fontSize: 12, color: '#64748b', display: 'block', marginBottom: 5 }}>Contact</label>
+                <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Contact</label>
                 <select style={{ ...inp }} value={form.contactId} onChange={e => setForm(f => ({ ...f, contactId: e.target.value }))}>
                   <option value="">— Sélectionner —</option>
                   {contacts.map(c => <option key={c.id} value={c.id}>{c.firstName} {c.lastName}</option>)}
                 </select>
               </div>
               <div>
-                <label style={{ fontSize: 12, color: '#64748b', display: 'block', marginBottom: 5 }}>Deal (optionnel)</label>
+                <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Deal (optionnel)</label>
                 <select style={{ ...inp }} value={form.dealId} onChange={e => setForm(f => ({ ...f, dealId: e.target.value }))}>
                   <option value="">— Sélectionner —</option>
                   {deals.map(d => <option key={d.id} value={d.id}>{d.title}</option>)}
@@ -235,17 +237,17 @@ export default function ActivitesPage() {
             </div>
 
             <div style={{ marginBottom: 12 }}>
-              <label style={{ fontSize: 12, color: '#64748b', display: 'block', marginBottom: 5 }}>Date & heure</label>
+              <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Date & heure</label>
               <input style={inp} type="datetime-local" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
             </div>
 
             <div style={{ marginBottom: 24 }}>
-              <label style={{ fontSize: 12, color: '#64748b', display: 'block', marginBottom: 5 }}>Notes</label>
+              <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Notes</label>
               <textarea style={{ ...inp, resize: 'vertical', minHeight: 80 }} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} />
             </div>
 
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowModal(false)} style={{ padding: '9px 18px', borderRadius: 8, background: '#1e2740', border: '1px solid #334155', color: '#94a3b8', cursor: 'pointer', fontSize: 14 }}>Annuler</button>
+              <button onClick={() => setShowModal(false)} style={{ padding: '9px 18px', borderRadius: 8, background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 14 }}>Annuler</button>
               <button onClick={handleSave} style={{ padding: '9px 20px', borderRadius: 8, background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 14, fontWeight: 600 }}>
                 {editing ? 'Sauvegarder' : 'Créer'}
               </button>
