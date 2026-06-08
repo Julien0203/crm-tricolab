@@ -130,7 +130,7 @@ function SitePill({ status }: { status: SiteStatus }) {
   );
 }
 
-type SortKey = 'name' | 'company' | 'status' | 'city' | 'batch';
+type SortKey = 'name' | 'company' | 'status' | 'city' | 'batch' | 'sector';
 type SortDir = 'asc' | 'desc';
 
 type FormData = {
@@ -158,7 +158,7 @@ const inp: React.CSSProperties = {
   fontSize: 13, outline: 'none',
 };
 
-const COL_WIDTHS = { name: 190, company: 180, city: 110, phone: 130, site: 100, status: 130, batch: 80, actions: 60 };
+const COL_WIDTHS = { name: 190, company: 160, sector: 120, city: 100, phone: 130, site: 100, status: 130, batch: 80, actions: 60 };
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
@@ -317,6 +317,7 @@ export default function ContactsPage() {
       if (sortKey === 'status') { va = a.prospectStatus; vb = b.prospectStatus; }
       if (sortKey === 'city') { va = a.city; vb = b.city; }
       if (sortKey === 'batch') { va = a.weekBatch || ''; vb = b.weekBatch || ''; }
+      if (sortKey === 'sector') { va = a.sectorLabel || a.sector; vb = b.sectorLabel || b.sector; }
       const cmp = va.localeCompare(vb, 'fr');
       return sortDir === 'asc' ? cmp : -cmp;
     });
@@ -508,11 +509,12 @@ export default function ContactsPage() {
 
         {/* Table */}
         <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', background: 'var(--glass-bg)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', border: '1px solid var(--glass-border)', borderRadius: 12, minWidth: 0 }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 780 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 900 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--section-bg)' }}>
                 <ColHeader label="Dirigeant" k="name" style={{ width: COL_WIDTHS.name }} />
                 <ColHeader label="Entreprise" k="company" style={{ width: COL_WIDTHS.company }} />
+                <ColHeader label="Secteur" k="sector" style={{ width: COL_WIDTHS.sector }} />
                 <ColHeader label="Ville" k="city" style={{ width: COL_WIDTHS.city }} />
                 <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 600, fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', letterSpacing: '0.05em', textTransform: 'uppercase', borderRight: '1px solid var(--border-light)', width: COL_WIDTHS.phone }}>Téléphone</th>
                 <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 600, fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', letterSpacing: '0.05em', textTransform: 'uppercase', borderRight: '1px solid var(--border-light)', width: COL_WIDTHS.site }}>Site</th>
@@ -549,6 +551,13 @@ export default function ContactsPage() {
                       {contactDeals.length > 0 && (
                         <div style={{ fontSize: 10, color: '#6366f1', marginTop: 2 }}>{contactDeals.length} deal{contactDeals.length > 1 ? 's' : ''}</div>
                       )}
+                    </td>
+
+                    {/* Secteur */}
+                    <td style={{ padding: '10px 12px' }}>
+                      <div style={{ fontSize: 12, color: 'var(--text-secondary)', maxWidth: COL_WIDTHS.sector - 24, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {contact.sectorLabel || SECTOR_LABELS[contact.sector]}
+                      </div>
                     </td>
 
                     {/* Ville */}
