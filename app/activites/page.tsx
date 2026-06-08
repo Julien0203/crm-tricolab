@@ -185,7 +185,7 @@ export default function ActivitesPage() {
       {/* Modal */}
       {showModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.22)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-          <div style={{ background: 'var(--glass-bg-solid)', backdropFilter: 'blur(60px) saturate(200%) brightness(110%)', WebkitBackdropFilter: 'blur(60px) saturate(200%) brightness(110%)', border: '1px solid var(--glass-border-med)', boxShadow: 'var(--glass-shadow-lg)', borderRadius: 18, padding: '28px', width: 480, maxHeight: '90vh', overflowY: 'auto' }}>
+          <div style={{ background: 'var(--glass-bg-solid)', backdropFilter: 'blur(60px) saturate(200%) brightness(110%)', WebkitBackdropFilter: 'blur(60px) saturate(200%) brightness(110%)', border: '1px solid var(--glass-border-med)', boxShadow: 'var(--glass-shadow-lg)', borderRadius: 18, padding: '28px', width: 480, maxWidth: 'calc(100vw - 32px)', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
               <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{editing ? 'Modifier' : 'Nouvelle activité'}</h2>
               <button onClick={() => setShowModal(false)} style={{ background: 'var(--hover-bg)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)', padding: 6 }}><X size={15} /></button>

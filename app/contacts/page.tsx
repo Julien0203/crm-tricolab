@@ -784,7 +784,7 @@ export default function ContactsPage() {
       {/* Modal — add/edit */}
       {showModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.22)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}>
-          <div style={{ background: 'var(--glass-bg-solid)', backdropFilter: 'blur(40px)', border: '1px solid var(--glass-border-med)', boxShadow: 'var(--glass-shadow-lg)', borderRadius: 16, padding: 24, width: 500, maxHeight: '92vh', overflowY: 'auto' }}>
+          <div style={{ background: 'var(--glass-bg-solid)', backdropFilter: 'blur(40px)', border: '1px solid var(--glass-border-med)', boxShadow: 'var(--glass-shadow-lg)', borderRadius: 16, padding: 24, width: 500, maxWidth: 'calc(100vw - 32px)', maxHeight: '92vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{editing ? 'Modifier le prospect' : 'Nouveau prospect'}</h2>
               <button onClick={() => setShowModal(false)} style={{ background: 'var(--hover-bg)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)', padding: 6 }}><X size={14} /></button>
@@ -822,7 +822,7 @@ export default function ContactsPage() {
       {/* Modal — CSV import */}
       {showCsvModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.22)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300 }}>
-          <div style={{ background: 'var(--glass-bg-solid)', backdropFilter: 'blur(40px)', border: '1px solid var(--glass-border-med)', boxShadow: 'var(--glass-shadow-lg)', borderRadius: 16, padding: 24, width: 560, maxHeight: '92vh', overflowY: 'auto' }}>
+          <div style={{ background: 'var(--glass-bg-solid)', backdropFilter: 'blur(40px)', border: '1px solid var(--glass-border-med)', boxShadow: 'var(--glass-shadow-lg)', borderRadius: 16, padding: 24, width: 560, maxWidth: 'calc(100vw - 32px)', maxHeight: '92vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <div>
                 <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>Importer des prospects CSV</h2>

@@ -197,7 +197,7 @@ export default function PipelinePage() {
       </div>
 
       {/* Kanban */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, overflowX: 'auto' }}>
+      <div className="kanban-board">
         {STAGES.map(stage => {
           const stageDeals = deals.filter(d => d.stage === stage.id);
           const stageCommission = stageDeals.reduce((s, d) => s + d.commission, 0);
@@ -263,7 +263,7 @@ export default function PipelinePage() {
       {/* Lost reason modal */}
       {lostModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.22)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}>
-          <div style={{ background: 'var(--glass-bg-solid)', backdropFilter: 'blur(40px)', border: '1px solid rgba(239,68,68,0.30)', boxShadow: 'var(--glass-shadow-lg)', borderRadius: 16, padding: '24px', width: 400 }}>
+          <div style={{ background: 'var(--glass-bg-solid)', backdropFilter: 'blur(40px)', border: '1px solid rgba(239,68,68,0.30)', boxShadow: 'var(--glass-shadow-lg)', borderRadius: 16, padding: '24px', width: 400, maxWidth: 'calc(100vw - 32px)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>Marquer comme perdu</h2>
               <button onClick={() => setLostModal(null)} style={{ background: 'var(--hover-bg)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)', padding: 5 }}><X size={13} /></button>
@@ -292,7 +292,7 @@ export default function PipelinePage() {
       {/* Modal */}
       {showModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.22)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-          <div style={{ background: 'var(--glass-bg-solid)', backdropFilter: 'blur(40px)', border: '1px solid var(--glass-border-med)', boxShadow: 'var(--glass-shadow-lg)', borderRadius: 16, padding: '24px', width: 460, maxHeight: '90vh', overflowY: 'auto' }}>
+          <div style={{ background: 'var(--glass-bg-solid)', backdropFilter: 'blur(40px)', border: '1px solid var(--glass-border-med)', boxShadow: 'var(--glass-shadow-lg)', borderRadius: 16, padding: '24px', width: 460, maxWidth: 'calc(100vw - 32px)', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{editing ? 'Modifier le deal' : 'Nouveau deal'}</h2>
               <button onClick={() => setShowModal(false)} style={{ background: 'var(--hover-bg)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)', padding: 5 }}><X size={13} /></button>

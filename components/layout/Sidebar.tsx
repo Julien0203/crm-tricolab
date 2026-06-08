@@ -87,6 +87,8 @@ export default function Sidebar() {
     letterSpacing: 'normal',
   };
 
+  if (pathname === '/login') return null;
+
   return (
     <>
       {/* Hamburger — mobile only */}

@@ -134,6 +134,12 @@ body {
   padding: 32px;
 }
 
+/* Login page — no sidebar, no offset */
+body:not(:has(.sidebar-nav)) .layout-main {
+  margin-left: 0 !important;
+  padding: 0 !important;
+}
+
 .sidebar-nav {
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -195,6 +201,14 @@ body {
   margin-bottom: 20px;
 }
 
+/* ── Kanban board ──────────────────────────── */
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  overflow-x: auto;
+}
+
 @media (max-width: 767px) {
   body {
     overflow-x: hidden;
@@ -239,6 +253,11 @@ body {
 
   .stack-mobile {
     grid-template-columns: 1fr !important;
+  }
+
+  .kanban-board {
+    grid-template-columns: repeat(5, 260px) !important;
+    padding-bottom: 8px;
   }
 
   .side-panel {
