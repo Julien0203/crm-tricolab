@@ -188,10 +188,10 @@ export default function ContactsPage() {
   const [csvBatch, setCsvBatch] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const reload = () => {
-    setContacts(getContacts());
-    setAllDeals(getDeals());
-    setAllActivities(getActivities());
+  const reload = async () => {
+    setContacts(await getContacts());
+    setAllDeals(await getDeals());
+    setAllActivities(await getActivities());
   };
   useEffect(() => { reload(); }, []);
 
@@ -222,7 +222,7 @@ export default function ContactsPage() {
     e.target.value = '';
   }
 
-  function handleImport() {
+  async function handleImport() {
     const get = (row: string[], field: string) => {
       const idx = csvMapping[field];
       return (idx !== undefined && idx >= 0 ? row[idx] ?? '' : '').trim();
@@ -259,8 +259,8 @@ export default function ContactsPage() {
       })
       .filter(c => c.firstName !== 'Inconnu' || c.company);
 
-    saveContacts(toImport);
-    reload();
+    await saveContacts(toImport);
+    await reload();
     setShowCsvModal(false);
   }
 
@@ -305,7 +305,7 @@ export default function ContactsPage() {
     setShowModal(true);
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!form.firstName.trim()) return;
     const data = {
       firstName: form.firstName, lastName: form.lastName,
@@ -316,19 +316,19 @@ export default function ContactsPage() {
       callNotes: form.callNotes, notes: form.notes,
     };
     if (editing) {
-      updateContact(editing.id, data);
+      await updateContact(editing.id, data);
       if (selected?.id === editing.id) setSelected({ ...selected, ...data });
     } else {
-      saveContact(data);
+      await saveContact(data);
     }
-    reload();
+    await reload();
     setShowModal(false);
   }
 
-  function handleDelete(id: string, e?: React.MouseEvent) {
+  async function handleDelete(id: string, e?: React.MouseEvent) {
     e?.stopPropagation();
-    deleteContact(id);
-    reload();
+    await deleteContact(id);
+    await reload();
     if (selected?.id === id) setSelected(null);
   }
 
@@ -378,11 +378,11 @@ export default function ContactsPage() {
               const color = PROSPECT_STATUS_COLORS[s];
               const isCurrent = s === contact.prospectStatus;
               return (
-                <button key={s} onClick={() => {
-                  updateContact(contact.id, { prospectStatus: s });
+                <button key={s} onClick={async () => {
+                  await updateContact(contact.id, { prospectStatus: s });
                   if (selected?.id === contact.id) setSelected(prev => prev ? { ...prev, prospectStatus: s } : null);
                   setInlineStatusId(null);
-                  reload();
+                  await reload();
                 }} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '6px 10px', borderRadius: 7, border: 'none', background: isCurrent ? `${color}12` : 'transparent', cursor: 'pointer', textAlign: 'left' }}>
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0 }} />
                   <span style={{ fontSize: 12, color: 'var(--text-primary)', fontWeight: isCurrent ? 600 : 400, flex: 1 }}>

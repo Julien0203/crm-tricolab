@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { getActivities, getSettings } from '@/lib/store';
 import { DEFAULT_SETTINGS } from '@/lib/types';
+import { supabase } from '@/lib/supabase';
 import {
   LayoutDashboard,
   Users,
@@ -21,6 +22,7 @@ import {
   CheckSquare,
   Moon,
   Sun,
+  LogOut,
 } from 'lucide-react';
 import GlobalSearch from '@/components/layout/GlobalSearch';
 import { useTheme } from '@/app/context/ThemeContext';
@@ -43,6 +45,7 @@ const tools = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { isDark, toggle } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [overdueCount, setOverdueCount] = useState(0);
@@ -51,12 +54,21 @@ export default function Sidebar() {
 
   useEffect(() => {
     setMobileOpen(false);
-    const now = new Date();
-    setOverdueCount(getActivities().filter(a => !a.completed && new Date(a.date) < now).length);
-    const s = getSettings();
-    setUserName(s.userName);
-    setUserTitle(s.userTitle);
+    async function loadSidebarData() {
+      const now = new Date();
+      const activities = await getActivities();
+      setOverdueCount(activities.filter(a => !a.completed && new Date(a.date) < now).length);
+      const s = await getSettings();
+      setUserName(s.userName);
+      setUserTitle(s.userTitle);
+    }
+    loadSidebarData();
   }, [pathname]);
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.push('/login');
+  }
 
   const activeLink = {
     background: 'var(--glass-bg-solid)',
@@ -197,23 +209,39 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Bottom: dark mode toggle + copyright */}
+        {/* Bottom: dark mode toggle + logout + copyright */}
         <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 11, color: 'var(--text-subtle)' }}>Thomas CRM © 2026</span>
-          <button
-            onClick={toggle}
-            title={isDark ? 'Mode clair' : 'Mode sombre'}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              width: 28, height: 28, borderRadius: 7,
-              background: 'var(--hover-bg)',
-              border: '1px solid var(--glass-border)',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-            }}
-          >
-            {isDark ? <Sun size={13} /> : <Moon size={13} />}
-          </button>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button
+              onClick={toggle}
+              title={isDark ? 'Mode clair' : 'Mode sombre'}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: 28, height: 28, borderRadius: 7,
+                background: 'var(--hover-bg)',
+                border: '1px solid var(--glass-border)',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+              }}
+            >
+              {isDark ? <Sun size={13} /> : <Moon size={13} />}
+            </button>
+            <button
+              onClick={handleLogout}
+              title="Se déconnecter"
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: 28, height: 28, borderRadius: 7,
+                background: 'var(--hover-bg)',
+                border: '1px solid var(--glass-border)',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+              }}
+            >
+              <LogOut size={13} />
+            </button>
+          </div>
         </div>
       </aside>
     </>

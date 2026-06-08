@@ -1,511 +1,322 @@
-import { Contact, Deal, Activity, CRMStore, COMMISSION_PER_DEAL, CRMSettings, DEFAULT_SETTINGS, CRMScripts, Task } from './types';
+import { supabase } from './supabase';
+import {
+  Contact, Deal, Activity, Task,
+  CRMSettings, DEFAULT_SETTINGS, CRMScripts, COMMISSION_PER_DEAL,
+} from './types';
 
-const STORAGE_KEY = 'thomas-crm-data-v2'; // v2: Tricolab data model
+// ── Mappers camelCase ↔ snake_case ────────────────────────────────────────────
 
-// Batch S22-2026 reçu de Clara le lundi 26 mai 2026
-// Batch S23-2026 reçu de Clara le lundi 2 juin 2026
-const defaultData: CRMStore = {
-  contacts: [
-    {
-      id: '1',
-      firstName: 'Karim',
-      lastName: 'Benali',
-      company: 'Benali Plomberie',
-      sector: 'batiment',
-      city: 'Lyon 7e',
-      email: 'k.benali@benali-plomberie.fr',
-      phone: '06 23 45 67 89',
-      siteStatus: 'vieux',
-      prospectStatus: 'interesse',
-      weekBatch: 'S22-2026',
-      callNotes: 'Très ouvert, veut moderniser son image. Site fait en 2018. Rappel R2 jeudi.',
-      notes: '',
-      source: 'appel_froid',
-      createdAt: new Date('2026-05-26').toISOString(),
-      updatedAt: new Date('2026-05-28').toISOString(),
-    },
-    {
-      id: '2',
-      firstName: 'Nathalie',
-      lastName: 'Rousseau',
-      company: 'Cabinet Rousseau',
-      sector: 'profession-liberale',
-      city: 'Grenoble',
-      email: 'n.rousseau@cabinet-rousseau.fr',
-      phone: '04 76 12 34 56',
-      siteStatus: 'aucun',
-      prospectStatus: 'r2-planifie',
-      weekBatch: 'S22-2026',
-      callNotes: 'Comptable indépendante, pas de site du tout. R2 planifié lundi 2 juin à 11h.',
-      notes: '',
-      source: 'appel_froid',
-      createdAt: new Date('2026-05-26').toISOString(),
-      updatedAt: new Date('2026-05-29').toISOString(),
-    },
-    {
-      id: '3',
-      firstName: 'Julien',
-      lastName: 'Mercier',
-      company: 'Le Refuge — Brasserie',
-      sector: 'restauration',
-      city: 'Annecy',
-      email: 'contact@lerefuge-annecy.fr',
-      phone: '04 50 23 11 98',
-      siteStatus: 'vieux',
-      prospectStatus: 'chaud',
-      weekBatch: 'S22-2026',
-      callNotes: 'Très motivé. Son site est honteux selon lui. Devis déjà évoqué, veut des exemples de réalisations.',
-      notes: '',
-      source: 'appel_froid',
-      createdAt: new Date('2026-05-26').toISOString(),
-      updatedAt: new Date('2026-05-30').toISOString(),
-    },
-    {
-      id: '4',
-      firstName: 'Patricia',
-      lastName: 'Lévêque',
-      company: 'Élec Pro 69',
-      sector: 'batiment',
-      city: 'Villeurbanne',
-      email: 'patricia@elecpro69.fr',
-      phone: '06 78 90 12 34',
-      siteStatus: 'aucun',
-      prospectStatus: 'injoignable',
-      weekBatch: 'S22-2026',
-      callNotes: 'Messagerie à chaque essai. 3 tentatives. Réessayer semaine prochaine.',
-      notes: '',
-      source: 'appel_froid',
-      createdAt: new Date('2026-05-26').toISOString(),
-      updatedAt: new Date('2026-05-27').toISOString(),
-    },
-    {
-      id: '5',
-      firstName: 'Sébastien',
-      lastName: 'Fontaine',
-      company: 'Coach Fontaine Performance',
-      sector: 'coach-consultant',
-      city: 'Chambéry',
-      email: 's.fontaine@coachfontaine.fr',
-      phone: '06 11 22 33 44',
-      siteStatus: 'existant',
-      prospectStatus: 'non-interesse',
-      weekBatch: 'S22-2026',
-      callNotes: 'Déjà un prestataire web, satisfait. Pas intéressé pour le moment.',
-      notes: '',
-      source: 'appel_froid',
-      createdAt: new Date('2026-05-26').toISOString(),
-      updatedAt: new Date('2026-05-26').toISOString(),
-    },
-    {
-      id: '6',
-      firstName: 'Ahmed',
-      lastName: 'Ouali',
-      company: 'Maçonnerie Ouali & Fils',
-      sector: 'batiment',
-      city: 'Saint-Étienne',
-      email: 'contact@maconnerie-ouali.fr',
-      phone: '07 55 66 77 88',
-      siteStatus: 'vieux',
-      prospectStatus: 'a-appeler',
-      weekBatch: 'S23-2026',
-      callNotes: '',
-      notes: '',
-      source: 'appel_froid',
-      createdAt: new Date('2026-06-02').toISOString(),
-      updatedAt: new Date('2026-06-02').toISOString(),
-    },
-    {
-      id: '7',
-      firstName: 'Claire',
-      lastName: 'Moreau',
-      company: 'Ostéo Claire Moreau',
-      sector: 'profession-liberale',
-      city: 'Bourg-en-Bresse',
-      email: 'claire.moreau.osteo@gmail.com',
-      phone: '06 44 55 66 77',
-      siteStatus: 'aucun',
-      prospectStatus: 'a-appeler',
-      weekBatch: 'S23-2026',
-      callNotes: '',
-      notes: '',
-      source: 'appel_froid',
-      createdAt: new Date('2026-06-02').toISOString(),
-      updatedAt: new Date('2026-06-02').toISOString(),
-    },
-    {
-      id: '8',
-      firstName: 'Thomas',
-      lastName: 'Garnier',
-      company: 'Boucherie Garnier',
-      sector: 'commerce',
-      city: 'Valence',
-      email: 'boucherie.garnier@wanadoo.fr',
-      phone: '04 75 43 21 09',
-      siteStatus: 'vieux',
-      prospectStatus: 'a-appeler',
-      weekBatch: 'S23-2026',
-      callNotes: '',
-      notes: '',
-      source: 'appel_froid',
-      createdAt: new Date('2026-06-02').toISOString(),
-      updatedAt: new Date('2026-06-02').toISOString(),
-    },
-    {
-      id: '9',
-      firstName: 'Marie',
-      lastName: 'Delacroix',
-      company: 'Institut Beauté Marie D.',
-      sector: 'commerce',
-      city: 'Lyon 3e',
-      email: 'marie.delacroix.beaute@gmail.com',
-      phone: '06 87 65 43 21',
-      siteStatus: 'aucun',
-      prospectStatus: 'interesse',
-      weekBatch: 'S23-2026',
-      callNotes: 'Appelée ce matin. Très intéressée, veut un site vitrine + Google. Rappel jeudi 5 juin.',
-      notes: '',
-      source: 'appel_froid',
-      createdAt: new Date('2026-06-02').toISOString(),
-      updatedAt: new Date('2026-06-03').toISOString(),
-    },
-    {
-      id: '10',
-      firstName: 'Pascal',
-      lastName: 'Vidal',
-      company: 'Menuiserie Vidal',
-      sector: 'batiment',
-      city: 'Clermont-Ferrand',
-      email: 'pascal.vidal@menuiserie-vidal.fr',
-      phone: '06 33 44 55 66',
-      siteStatus: 'vieux',
-      prospectStatus: 'a-appeler',
-      weekBatch: 'S23-2026',
-      callNotes: '',
-      notes: '',
-      source: 'appel_froid',
-      createdAt: new Date('2026-06-02').toISOString(),
-      updatedAt: new Date('2026-06-02').toISOString(),
-    },
-  ],
-  deals: [
-    {
-      id: '1',
-      title: 'Site vitrine — Le Refuge Brasserie',
-      contactId: '3',
-      stage: 'r2',
-      value: 1920,
-      commission: COMMISSION_PER_DEAL,
-      probability: 75,
-      notes: 'Très chaud. Envoyer exemples de réas restaurants avant R2.',
-      expectedCloseDate: new Date('2026-06-10').toISOString(),
-      createdAt: new Date('2026-05-28').toISOString(),
-      updatedAt: new Date('2026-05-30').toISOString(),
-    },
-    {
-      id: '2',
-      title: 'Site vitrine — Cabinet Rousseau',
-      contactId: '2',
-      stage: 'r2',
-      value: 1920,
-      commission: COMMISSION_PER_DEAL,
-      probability: 60,
-      notes: 'Comptable sans site. R2 lundi 2 juin 11h.',
-      expectedCloseDate: new Date('2026-06-13').toISOString(),
-      createdAt: new Date('2026-05-27').toISOString(),
-      updatedAt: new Date('2026-05-29').toISOString(),
-    },
-    {
-      id: '3',
-      title: 'Site vitrine — Benali Plomberie',
-      contactId: '1',
-      stage: 'devis-envoye',
-      value: 1920,
-      commission: COMMISSION_PER_DEAL,
-      probability: 50,
-      notes: 'Devis envoyé le 30 mai. Relance prévue vendredi.',
-      expectedCloseDate: new Date('2026-06-07').toISOString(),
-      createdAt: new Date('2026-05-26').toISOString(),
-      updatedAt: new Date('2026-05-30').toISOString(),
-    },
-    {
-      id: '4',
-      title: 'Site vitrine — Institut Marie D.',
-      contactId: '9',
-      stage: 'r1',
-      value: 1920,
-      commission: COMMISSION_PER_DEAL,
-      probability: 40,
-      notes: 'Premier contact positif, rappel R2 jeudi.',
-      expectedCloseDate: new Date('2026-06-20').toISOString(),
-      createdAt: new Date('2026-06-03').toISOString(),
-      updatedAt: new Date('2026-06-03').toISOString(),
-    },
-    {
-      id: '5',
-      title: 'Site vitrine — Fontaine Performance',
-      contactId: '5',
-      stage: 'perdu',
-      value: 1920,
-      commission: COMMISSION_PER_DEAL,
-      probability: 0,
-      notes: '',
-      lostReason: 'concurrent',
-      lostNote: 'Déjà prestataire web en place, satisfait.',
-      expectedCloseDate: new Date('2026-05-30').toISOString(),
-      createdAt: new Date('2026-05-26').toISOString(),
-      updatedAt: new Date('2026-05-26').toISOString(),
-    },
-  ],
-  activities: [
-    {
-      id: '1',
-      type: 'appel',
-      contactId: '3',
-      dealId: '1',
-      title: 'R2 — Le Refuge Brasserie',
-      notes: 'Appel R2 avec Julien Mercier. Préparer exemples réalisations restaurants.',
-      date: new Date('2026-06-04T10:00:00').toISOString(),
-      completed: false,
-      createdAt: new Date('2026-05-30').toISOString(),
-    },
-    {
-      id: '2',
-      type: 'appel',
-      contactId: '2',
-      dealId: '2',
-      title: 'R2 — Cabinet Rousseau',
-      notes: 'R2 planifié. Nathalie attend des exemples secteur profession libérale.',
-      date: new Date('2026-06-02T11:00:00').toISOString(),
-      completed: true,
-      createdAt: new Date('2026-05-29').toISOString(),
-    },
-    {
-      id: '3',
-      type: 'email',
-      contactId: '1',
-      dealId: '3',
-      title: 'Relance devis — Benali Plomberie',
-      notes: 'Devis envoyé le 30 mai, pas de réponse. Relancer par email + appel.',
-      date: new Date('2026-06-06T09:00:00').toISOString(),
-      completed: false,
-      createdAt: new Date('2026-06-03').toISOString(),
-    },
-    {
-      id: '4',
-      type: 'appel',
-      contactId: '9',
-      dealId: '4',
-      title: 'R2 — Institut Marie Delacroix',
-      notes: 'Rappel R2 suite au bon premier contact ce matin.',
-      date: new Date('2026-06-05T14:00:00').toISOString(),
-      completed: false,
-      createdAt: new Date('2026-06-03').toISOString(),
-    },
-    {
-      id: '5',
-      type: 'appel',
-      contactId: '4',
-      title: 'Relance Patricia — Élec Pro 69',
-      notes: 'Injoignable 3×. Réessayer à une heure différente.',
-      date: new Date('2026-06-04T16:00:00').toISOString(),
-      completed: false,
-      createdAt: new Date('2026-06-03').toISOString(),
-    },
-    {
-      id: '6',
-      type: 'appel',
-      contactId: '6',
-      title: 'R1 — Maçonnerie Ouali',
-      notes: 'Nouveau prospect S23. Premier appel à passer.',
-      date: new Date('2026-06-03T11:00:00').toISOString(),
-      completed: false,
-      createdAt: new Date('2026-06-02').toISOString(),
-    },
-    {
-      id: '7',
-      type: 'appel',
-      contactId: '7',
-      title: 'R1 — Ostéo Claire Moreau',
-      notes: 'Nouveau prospect S23. Premier appel à passer.',
-      date: new Date('2026-06-03T15:00:00').toISOString(),
-      completed: false,
-      createdAt: new Date('2026-06-02').toISOString(),
-    },
-    {
-      id: '8',
-      type: 'appel',
-      contactId: '1',
-      dealId: '3',
-      title: 'R1 — Benali Plomberie',
-      notes: 'Premier appel réussi. Intéressé, site 2018 à refaire.',
-      date: new Date('2026-05-27T10:30:00').toISOString(),
-      completed: true,
-      createdAt: new Date('2026-05-27').toISOString(),
-    },
-  ],
-};
-
-function getStore(): CRMStore {
-  if (typeof window === 'undefined') return defaultData;
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
-    return defaultData;
-  }
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return defaultData;
-  }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function dbToContact(r: any): Contact {
+  return {
+    id: r.id,
+    firstName: r.first_name || '',
+    lastName: r.last_name || '',
+    company: r.company || '',
+    sector: r.sector,
+    city: r.city || '',
+    email: r.email || '',
+    phone: r.phone || '',
+    siteStatus: r.site_status,
+    prospectStatus: r.prospect_status,
+    weekBatch: r.week_batch || '',
+    callNotes: r.call_notes || '',
+    notes: r.notes || '',
+    source: r.source || 'appel_froid',
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+  };
 }
 
-function saveStore(data: CRMStore) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+function contactToDb(c: Partial<Contact>): Record<string, unknown> {
+  const r: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if ('firstName'      in c) r.first_name      = c.firstName;
+  if ('lastName'       in c) r.last_name        = c.lastName;
+  if ('company'        in c) r.company          = c.company;
+  if ('sector'         in c) r.sector           = c.sector;
+  if ('city'           in c) r.city             = c.city;
+  if ('email'          in c) r.email            = c.email;
+  if ('phone'          in c) r.phone            = c.phone;
+  if ('siteStatus'     in c) r.site_status      = c.siteStatus;
+  if ('prospectStatus' in c) r.prospect_status  = c.prospectStatus;
+  if ('weekBatch'      in c) r.week_batch       = c.weekBatch;
+  if ('callNotes'      in c) r.call_notes       = c.callNotes;
+  if ('notes'          in c) r.notes            = c.notes;
+  if ('source'         in c) r.source           = c.source;
+  return r;
 }
 
-// Contacts
-export function getContacts(): Contact[] {
-  return getStore().contacts;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function dbToDeal(r: any): Deal {
+  return {
+    id: r.id,
+    title: r.title,
+    contactId: r.contact_id || '',
+    stage: r.stage,
+    value: r.value ?? 1920,
+    commission: r.commission ?? COMMISSION_PER_DEAL,
+    probability: r.probability ?? 0,
+    notes: r.notes || '',
+    lostReason: r.lost_reason,
+    lostNote: r.lost_note,
+    expectedCloseDate: r.expected_close_date,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+  };
 }
 
-export function getContact(id: string): Contact | undefined {
-  return getStore().contacts.find(c => c.id === id);
+function dealToDb(d: Partial<Deal>): Record<string, unknown> {
+  const r: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  if ('title'             in d) r.title              = d.title;
+  if ('contactId'         in d) r.contact_id          = d.contactId;
+  if ('stage'             in d) r.stage               = d.stage;
+  if ('value'             in d) r.value               = d.value;
+  if ('commission'        in d) r.commission          = d.commission;
+  if ('probability'       in d) r.probability         = d.probability;
+  if ('notes'             in d) r.notes               = d.notes;
+  if ('lostReason'        in d) r.lost_reason         = d.lostReason;
+  if ('lostNote'          in d) r.lost_note           = d.lostNote;
+  if ('expectedCloseDate' in d) r.expected_close_date = d.expectedCloseDate;
+  return r;
 }
 
-export function saveContacts(contacts: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>[]): Contact[] {
-  const store = getStore();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function dbToActivity(r: any): Activity {
+  return {
+    id: r.id,
+    type: r.type,
+    title: r.title,
+    contactId: r.contact_id,
+    dealId: r.deal_id,
+    notes: r.notes || '',
+    date: r.date,
+    completed: r.completed || false,
+    createdAt: r.created_at,
+  };
+}
+
+function activityToDb(a: Partial<Activity>): Record<string, unknown> {
+  const r: Record<string, unknown> = {};
+  if ('type'      in a) r.type       = a.type;
+  if ('title'     in a) r.title      = a.title;
+  if ('contactId' in a) r.contact_id = a.contactId;
+  if ('dealId'    in a) r.deal_id    = a.dealId;
+  if ('notes'     in a) r.notes      = a.notes;
+  if ('date'      in a) r.date       = a.date;
+  if ('completed' in a) r.completed  = a.completed;
+  return r;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function dbToTask(r: any): Task {
+  return {
+    id: r.id,
+    text: r.text,
+    completed: r.completed || false,
+    createdAt: r.created_at,
+  };
+}
+
+// ── Contacts ──────────────────────────────────────────────────────────────────
+
+export async function getContacts(): Promise<Contact[]> {
+  const { data, error } = await supabase
+    .from('contacts')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) { console.error('getContacts', error); return []; }
+  return (data || []).map(dbToContact);
+}
+
+export async function getContact(id: string): Promise<Contact | undefined> {
+  const { data } = await supabase.from('contacts').select('*').eq('id', id).single();
+  return data ? dbToContact(data) : undefined;
+}
+
+export async function saveContacts(
+  contacts: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>[]
+): Promise<Contact[]> {
   const now = new Date().toISOString();
-  const newContacts: Contact[] = contacts.map((c, i) => ({
-    ...c,
-    id: (Date.now() + i).toString(),
-    createdAt: now,
-    updatedAt: now,
-  }));
-  store.contacts.unshift(...newContacts);
-  saveStore(store);
-  return newContacts;
+  const rows = contacts.map(c => ({ ...contactToDb(c as Partial<Contact>), created_at: now }));
+  const { data, error } = await supabase.from('contacts').insert(rows).select();
+  if (error) { console.error('saveContacts', error); return []; }
+  return (data || []).map(dbToContact);
 }
 
-export function saveContact(contact: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>): Contact {
-  const store = getStore();
-  const newContact: Contact = {
-    ...contact,
-    id: Date.now().toString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+export async function saveContact(
+  contact: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<Contact> {
+  const { data, error } = await supabase
+    .from('contacts')
+    .insert({ ...contactToDb(contact as Partial<Contact>), created_at: new Date().toISOString() })
+    .select()
+    .single();
+  if (error) throw error;
+  return dbToContact(data);
+}
+
+export async function updateContact(
+  id: string,
+  updates: Partial<Contact>
+): Promise<Contact | null> {
+  const { data, error } = await supabase
+    .from('contacts')
+    .update(contactToDb(updates))
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) { console.error('updateContact', error); return null; }
+  return data ? dbToContact(data) : null;
+}
+
+export async function deleteContact(id: string): Promise<void> {
+  await supabase.from('contacts').delete().eq('id', id);
+}
+
+// ── Deals ──────────────────────────────────────────────────────────────────────
+
+export async function getDeals(): Promise<Deal[]> {
+  const { data, error } = await supabase
+    .from('deals')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) { console.error('getDeals', error); return []; }
+  return (data || []).map(dbToDeal);
+}
+
+export async function saveDeal(
+  deal: Omit<Deal, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<Deal> {
+  const { data, error } = await supabase
+    .from('deals')
+    .insert({ ...dealToDb(deal as Partial<Deal>), created_at: new Date().toISOString() })
+    .select()
+    .single();
+  if (error) throw error;
+  return dbToDeal(data);
+}
+
+export async function updateDeal(
+  id: string,
+  updates: Partial<Deal>
+): Promise<Deal | null> {
+  const { data, error } = await supabase
+    .from('deals')
+    .update(dealToDb(updates))
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) { console.error('updateDeal', error); return null; }
+  return data ? dbToDeal(data) : null;
+}
+
+export async function deleteDeal(id: string): Promise<void> {
+  await supabase.from('deals').delete().eq('id', id);
+}
+
+// ── Activities ────────────────────────────────────────────────────────────────
+
+export async function getActivities(): Promise<Activity[]> {
+  const { data, error } = await supabase
+    .from('activities')
+    .select('*')
+    .order('date', { ascending: true });
+  if (error) { console.error('getActivities', error); return []; }
+  return (data || []).map(dbToActivity);
+}
+
+export async function saveActivity(
+  activity: Omit<Activity, 'id' | 'createdAt'>
+): Promise<Activity> {
+  const { data, error } = await supabase
+    .from('activities')
+    .insert({ ...activityToDb(activity as Partial<Activity>), created_at: new Date().toISOString() })
+    .select()
+    .single();
+  if (error) throw error;
+  return dbToActivity(data);
+}
+
+export async function updateActivity(
+  id: string,
+  updates: Partial<Activity>
+): Promise<Activity | null> {
+  const { data, error } = await supabase
+    .from('activities')
+    .update(activityToDb(updates))
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) { console.error('updateActivity', error); return null; }
+  return data ? dbToActivity(data) : null;
+}
+
+export async function deleteActivity(id: string): Promise<void> {
+  await supabase.from('activities').delete().eq('id', id);
+}
+
+// ── Tasks ──────────────────────────────────────────────────────────────────────
+
+export async function getTasks(): Promise<Task[]> {
+  const { data, error } = await supabase
+    .from('tasks')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) { console.error('getTasks', error); return []; }
+  return (data || []).map(dbToTask);
+}
+
+export async function saveTask(text: string): Promise<Task> {
+  const { data, error } = await supabase
+    .from('tasks')
+    .insert({ text, completed: false, created_at: new Date().toISOString() })
+    .select()
+    .single();
+  if (error) throw error;
+  return dbToTask(data);
+}
+
+export async function updateTask(id: string, updates: Partial<Task>): Promise<void> {
+  await supabase.from('tasks').update(updates).eq('id', id);
+}
+
+export async function deleteTask(id: string): Promise<void> {
+  await supabase.from('tasks').delete().eq('id', id);
+}
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+
+export async function getSettings(): Promise<CRMSettings> {
+  const { data } = await supabase.from('settings').select('*').eq('id', 'default').single();
+  if (!data) return DEFAULT_SETTINGS;
+  return {
+    userName:               data.user_name               ?? DEFAULT_SETTINGS.userName,
+    userTitle:              data.user_title              ?? DEFAULT_SETTINGS.userTitle,
+    contractStart:          data.contract_start          ?? DEFAULT_SETTINGS.contractStart,
+    contractEnd:            data.contract_end            ?? DEFAULT_SETTINGS.contractEnd,
+    contractTarget:         data.contract_target         ?? DEFAULT_SETTINGS.contractTarget,
+    commissionPerDeal:      data.commission_per_deal     ?? DEFAULT_SETTINGS.commissionPerDeal,
+    weeklyTargetDeals:      data.weekly_target_deals     ?? DEFAULT_SETTINGS.weeklyTargetDeals,
+    weeklyTargetCommission: data.weekly_target_commission ?? DEFAULT_SETTINGS.weeklyTargetCommission,
   };
-  store.contacts.unshift(newContact);
-  saveStore(store);
-  return newContact;
 }
 
-export function updateContact(id: string, updates: Partial<Contact>): Contact | null {
-  const store = getStore();
-  const idx = store.contacts.findIndex(c => c.id === id);
-  if (idx === -1) return null;
-  store.contacts[idx] = { ...store.contacts[idx], ...updates, updatedAt: new Date().toISOString() };
-  saveStore(store);
-  return store.contacts[idx];
+export async function saveSettings(s: CRMSettings): Promise<void> {
+  await supabase.from('settings').upsert({
+    id: 'default',
+    user_name:               s.userName,
+    user_title:              s.userTitle,
+    contract_start:          s.contractStart,
+    contract_end:            s.contractEnd,
+    contract_target:         s.contractTarget,
+    commission_per_deal:     s.commissionPerDeal,
+    weekly_target_deals:     s.weeklyTargetDeals,
+    weekly_target_commission: s.weeklyTargetCommission,
+  });
 }
 
-export function deleteContact(id: string) {
-  const store = getStore();
-  store.contacts = store.contacts.filter(c => c.id !== id);
-  store.deals = store.deals.filter(d => d.contactId !== id);
-  store.activities = store.activities.filter(a => a.contactId !== id);
-  saveStore(store);
-}
+// ── Scripts (localStorage – templates locaux) ─────────────────────────────────
 
-// Deals
-export function getDeals(): Deal[] {
-  return getStore().deals;
-}
-
-export function saveDeal(deal: Omit<Deal, 'id' | 'createdAt' | 'updatedAt'>): Deal {
-  const store = getStore();
-  const newDeal: Deal = {
-    ...deal,
-    id: Date.now().toString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  store.deals.unshift(newDeal);
-  saveStore(store);
-  return newDeal;
-}
-
-export function updateDeal(id: string, updates: Partial<Deal>): Deal | null {
-  const store = getStore();
-  const idx = store.deals.findIndex(d => d.id === id);
-  if (idx === -1) return null;
-  store.deals[idx] = { ...store.deals[idx], ...updates, updatedAt: new Date().toISOString() };
-  saveStore(store);
-  return store.deals[idx];
-}
-
-export function deleteDeal(id: string) {
-  const store = getStore();
-  store.deals = store.deals.filter(d => d.id !== id);
-  saveStore(store);
-}
-
-// Activities
-export function getActivities(): Activity[] {
-  return getStore().activities;
-}
-
-export function saveActivity(activity: Omit<Activity, 'id' | 'createdAt'>): Activity {
-  const store = getStore();
-  const newActivity: Activity = {
-    ...activity,
-    id: Date.now().toString(),
-    createdAt: new Date().toISOString(),
-  };
-  store.activities.unshift(newActivity);
-  saveStore(store);
-  return newActivity;
-}
-
-export function updateActivity(id: string, updates: Partial<Activity>): Activity | null {
-  const store = getStore();
-  const idx = store.activities.findIndex(a => a.id === id);
-  if (idx === -1) return null;
-  store.activities[idx] = { ...store.activities[idx], ...updates };
-  saveStore(store);
-  return store.activities[idx];
-}
-
-export function deleteActivity(id: string) {
-  const store = getStore();
-  store.activities = store.activities.filter(a => a.id !== id);
-  saveStore(store);
-}
-
-// Helper: reset localStorage to fresh default data
-export function resetStore() {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
-}
-
-// Settings
-const SETTINGS_KEY = 'thomas-crm-settings-v1';
-
-export function getSettings(): CRMSettings {
-  if (typeof window === 'undefined') return DEFAULT_SETTINGS;
-  try {
-    const raw = localStorage.getItem(SETTINGS_KEY);
-    return raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : DEFAULT_SETTINGS;
-  } catch {
-    return DEFAULT_SETTINGS;
-  }
-}
-
-export function saveSettings(s: CRMSettings): void {
-  if (typeof window !== 'undefined') localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
-}
-
-// Scripts
 const SCRIPTS_KEY = 'thomas-crm-scripts-v1';
 
 export function getScripts(): CRMScripts | null {
@@ -513,42 +324,9 @@ export function getScripts(): CRMScripts | null {
   try {
     const raw = localStorage.getItem(SCRIPTS_KEY);
     return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 export function saveScripts(s: CRMScripts): void {
   if (typeof window !== 'undefined') localStorage.setItem(SCRIPTS_KEY, JSON.stringify(s));
-}
-
-// Tasks
-const TASKS_KEY = 'thomas-crm-taches-v1';
-
-export function getTasks(): Task[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = localStorage.getItem(TASKS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-export function saveTask(text: string): Task {
-  const tasks = getTasks();
-  const task: Task = { id: Date.now().toString(), text, completed: false, createdAt: new Date().toISOString() };
-  tasks.unshift(task);
-  localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
-  return task;
-}
-
-export function updateTask(id: string, updates: Partial<Task>): void {
-  const tasks = getTasks().map(t => t.id === id ? { ...t, ...updates } : t);
-  localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
-}
-
-export function deleteTask(id: string): void {
-  const tasks = getTasks().filter(t => t.id !== id);
-  localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
 }

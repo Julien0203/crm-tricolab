@@ -24,9 +24,12 @@ export default function RapportsPage() {
   const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setDeals(getDeals());
-    setContacts(getContacts());
-    setActivities(getActivities());
+    async function load() {
+      setDeals(await getDeals());
+      setContacts(await getContacts());
+      setActivities(await getActivities());
+    }
+    load();
   }, []);
 
   const monthlyStats = getMonthlyStats(deals, 6);

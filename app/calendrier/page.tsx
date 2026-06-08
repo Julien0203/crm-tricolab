@@ -33,7 +33,7 @@ export default function CalendrierPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(new Date());
 
-  const reload = () => { setActivities(getActivities()); setContacts(getContacts()); };
+  const reload = async () => { setActivities(await getActivities()); setContacts(await getContacts()); };
   useEffect(() => { reload(); }, []);
 
   const monthStart = startOfMonth(currentMonth);
@@ -191,7 +191,7 @@ export default function CalendrierPage() {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                 <button
-                  onClick={() => { updateActivity(activity.id, { completed: !activity.completed }); reload(); }}
+                  onClick={async () => { await updateActivity(activity.id, { completed: !activity.completed }); await reload(); }}
                   style={{
                     width: 20, height: 20, borderRadius: 5, flexShrink: 0, cursor: 'pointer',
                     border: `2px solid ${activity.completed ? '#34d399' : 'rgba(255,255,255,0.25)'}`,

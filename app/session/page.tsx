@@ -38,7 +38,7 @@ export default function SessionPage() {
   const [activeTimer, setActiveTimer] = useState<string | null>(null); // contact id
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const reload = () => setContacts(getContacts());
+  const reload = async () => setContacts(await getContacts());
   useEffect(() => { reload(); }, []);
 
   // Tick active timer
@@ -78,12 +78,12 @@ export default function SessionPage() {
   }).length;
   const negatifs = actionedCount - positifs;
 
-  function handleAction(contact: Contact, newStatus: ProspectStatus, e: React.MouseEvent) {
+  async function handleAction(contact: Contact, newStatus: ProspectStatus, e: React.MouseEvent) {
     e.stopPropagation();
     const note = notes[contact.id] || '';
     const duration = timers[contact.id] || 0;
-    updateContact(contact.id, { prospectStatus: newStatus, ...(note ? { callNotes: note } : {}) });
-    saveActivity({
+    await updateContact(contact.id, { prospectStatus: newStatus, ...(note ? { callNotes: note } : {}) });
+    await saveActivity({
       type: 'appel',
       contactId: contact.id,
       title: `${PROSPECT_STATUS_LABELS[newStatus]} — ${contact.firstName} ${contact.lastName}`,
@@ -93,7 +93,7 @@ export default function SessionPage() {
     });
     if (activeTimer === contact.id) stopTimer();
     setActioned(prev => new Set([...prev, contact.id]));
-    reload();
+    await reload();
   }
 
   const inp: React.CSSProperties = {
@@ -292,11 +292,11 @@ export default function SessionPage() {
                       type="text"
                       value={notes[contact.id] || ''}
                       onChange={e => setNotes(prev => ({ ...prev, [contact.id]: e.target.value }))}
-                      onBlur={e => {
+                      onBlur={async e => {
                         const val = e.target.value.trim();
                         if (val && val !== contact.callNotes) {
-                          updateContact(contact.id, { callNotes: val });
-                          reload();
+                          await updateContact(contact.id, { callNotes: val });
+                          await reload();
                         }
                       }}
                       placeholder={contact.callNotes ? contact.callNotes.slice(0, 30) + '…' : 'Résumé appel...'}

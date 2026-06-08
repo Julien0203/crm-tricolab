@@ -59,7 +59,7 @@ export default function ParametresPage() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    setForm(getSettings());
+    getSettings().then(s => setForm(s));
   }, []);
 
   function set<K extends keyof CRMSettings>(key: K, value: CRMSettings[K]) {
@@ -67,8 +67,8 @@ export default function ParametresPage() {
     setSaved(false);
   }
 
-  function handleSave() {
-    saveSettings(form);
+  async function handleSave() {
+    await saveSettings(form);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   }

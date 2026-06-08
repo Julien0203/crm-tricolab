@@ -22,30 +22,30 @@ export default function TachesPage() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setTasks(getTasks());
+    getTasks().then(t => setTasks(t));
   }, []);
 
-  function handleAdd() {
+  async function handleAdd() {
     const text = input.trim();
     if (!text) return;
-    const t = saveTask(text);
+    const t = await saveTask(text);
     setTasks(prev => [t, ...prev]);
     setInput('');
     inputRef.current?.focus();
   }
 
-  function handleToggle(id: string, completed: boolean) {
-    updateTask(id, { completed: !completed });
+  async function handleToggle(id: string, completed: boolean) {
+    await updateTask(id, { completed: !completed });
     setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !completed } : t));
   }
 
-  function handleDelete(id: string) {
-    deleteTask(id);
+  async function handleDelete(id: string) {
+    await deleteTask(id);
     setTasks(prev => prev.filter(t => t.id !== id));
   }
 
-  function handleClearDone() {
-    tasks.filter(t => t.completed).forEach(t => deleteTask(t.id));
+  async function handleClearDone() {
+    await Promise.all(tasks.filter(t => t.completed).map(t => deleteTask(t.id)));
     setTasks(prev => prev.filter(t => !t.completed));
   }
 

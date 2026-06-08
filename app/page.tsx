@@ -91,15 +91,18 @@ export default function DashboardPage() {
   const [settings, setSettings] = useState<CRMSettings>(DEFAULT_SETTINGS);
 
   useEffect(() => {
-    const s = getSettings();
-    const c = getContacts();
-    const d = getDeals();
-    const a = getActivities();
-    setSettings(s);
-    setContacts(c);
-    setDeals(d);
-    setActivities(a);
-    setAlerts(generateSmartAlerts(c, d, a, s.weeklyTargetCommission));
+    async function load() {
+      const s = await getSettings();
+      const c = await getContacts();
+      const d = await getDeals();
+      const a = await getActivities();
+      setSettings(s);
+      setContacts(c);
+      setDeals(d);
+      setActivities(a);
+      setAlerts(generateSmartAlerts(c, d, a, s.weeklyTargetCommission));
+    }
+    load();
   }, []);
 
   const now = new Date();

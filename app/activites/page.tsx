@@ -37,7 +37,7 @@ export default function ActivitesPage() {
   const [form, setForm] = useState<FormData>(emptyForm);
   const [filter, setFilter] = useState<'all' | 'todo' | 'done' | ActivityType>('all');
 
-  const reload = () => { setActivities(getActivities()); setContacts(getContacts()); setDeals(getDeals()); };
+  const reload = async () => { setActivities(await getActivities()); setContacts(await getContacts()); setDeals(await getDeals()); };
   useEffect(() => { reload(); }, []);
 
   const filtered = activities.filter(a => {
@@ -54,17 +54,17 @@ export default function ActivitesPage() {
     setShowModal(true);
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!form.title.trim()) return;
     const data = { ...form, date: new Date(form.date).toISOString(), dealId: form.dealId || undefined };
-    if (editing) updateActivity(editing.id, data);
-    else saveActivity(data);
-    reload(); setShowModal(false);
+    if (editing) await updateActivity(editing.id, data);
+    else await saveActivity(data);
+    await reload(); setShowModal(false);
   }
 
-  function toggleDone(id: string, completed: boolean) {
-    updateActivity(id, { completed: !completed });
-    reload();
+  async function toggleDone(id: string, completed: boolean) {
+    await updateActivity(id, { completed: !completed });
+    await reload();
   }
 
   const inp: React.CSSProperties = { width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--input-border)', background: 'var(--glass-bg)', backdropFilter: 'blur(20px) saturate(180%)', color: 'var(--text-primary)', fontSize: 14, outline: 'none' };
@@ -168,7 +168,7 @@ export default function ActivitesPage() {
               {/* Actions */}
               <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
                 <button onClick={() => openEdit(activity)} style={{ padding: 6, borderRadius: 6, background: 'var(--hover-bg)', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><Pencil size={13} /></button>
-                <button onClick={() => { deleteActivity(activity.id); reload(); }} style={{ padding: 6, borderRadius: 6, background: 'var(--hover-bg)', border: 'none', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={13} /></button>
+                <button onClick={async () => { await deleteActivity(activity.id); await reload(); }} style={{ padding: 6, borderRadius: 6, background: 'var(--hover-bg)', border: 'none', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={13} /></button>
               </div>
             </div>
           );

@@ -121,7 +121,7 @@ export default function PipelinePage() {
   const [lostModal, setLostModal] = useState<{ dealId: string } | null>(null);
   const [lostForm, setLostForm] = useState<{ lostReason: LostReason | ''; lostNote: string }>({ lostReason: '', lostNote: '' });
 
-  const reload = () => { setDeals(getDeals()); setContacts(getContacts()); };
+  const reload = async () => { setDeals(await getDeals()); setContacts(await getContacts()); };
   useEffect(() => { reload(); }, []);
 
   function openNew(stage: DealStage = 'r1') {
@@ -135,22 +135,22 @@ export default function PipelinePage() {
     setShowModal(true);
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!form.title.trim()) return;
     const data = { ...form, expectedCloseDate: form.expectedCloseDate ? new Date(form.expectedCloseDate).toISOString() : '' };
-    if (editing) updateDeal(editing.id, data);
-    else saveDeal(data);
-    reload(); setShowModal(false);
+    if (editing) await updateDeal(editing.id, data);
+    else await saveDeal(data);
+    await reload(); setShowModal(false);
   }
 
-  function requestStageChange(dealId: string, stage: DealStage) {
+  async function requestStageChange(dealId: string, stage: DealStage) {
     if (stage === 'perdu') {
       setLostForm({ lostReason: '', lostNote: '' });
       setLostModal({ dealId });
     } else {
       const prob = stage === 'signe' ? 100 : stage === 'devis-envoye' ? 60 : stage === 'r2' ? 40 : 20;
-      updateDeal(dealId, { stage, probability: prob });
-      reload();
+      await updateDeal(dealId, { stage, probability: prob });
+      await reload();
     }
   }
 
@@ -160,14 +160,14 @@ export default function PipelinePage() {
     setDragOverStage(null);
   }
 
-  function confirmLost() {
+  async function confirmLost() {
     if (!lostModal) return;
-    updateDeal(lostModal.dealId, {
+    await updateDeal(lostModal.dealId, {
       stage: 'perdu', probability: 0,
       lostReason: lostForm.lostReason || undefined,
       lostNote: lostForm.lostNote || undefined,
     });
-    reload();
+    await reload();
     setLostModal(null);
   }
 
@@ -245,7 +245,7 @@ export default function PipelinePage() {
                   deal={deal}
                   contact={contacts.find(c => c.id === deal.contactId)}
                   onEdit={() => openEdit(deal)}
-                  onDelete={() => { deleteDeal(deal.id); reload(); }}
+                  onDelete={async () => { await deleteDeal(deal.id); await reload(); }}
                   onStageChange={s => requestStageChange(deal.id, s)}
                 />
               ))}
