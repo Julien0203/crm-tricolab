@@ -137,6 +137,7 @@ type FormData = {
   firstName: string; lastName: string;
   company: string; sector: BusinessSector;
   city: string; email: string; phone: string;
+  age: string;
   siteStatus: SiteStatus; prospectStatus: ProspectStatus;
   weekBatch: string; callNotes: string; notes: string;
 };
@@ -145,6 +146,7 @@ const emptyForm: FormData = {
   firstName: '', lastName: '',
   company: '', sector: 'batiment',
   city: '', email: '', phone: '',
+  age: '',
   siteStatus: 'inconnu', prospectStatus: 'a-appeler',
   weekBatch: '', callNotes: '', notes: '',
 };
@@ -334,6 +336,7 @@ export default function ContactsPage() {
       firstName: c.firstName, lastName: c.lastName,
       company: c.company, sector: c.sector,
       city: c.city, email: c.email, phone: c.phone,
+      age: c.age !== undefined ? String(c.age) : '',
       siteStatus: c.siteStatus, prospectStatus: c.prospectStatus,
       weekBatch: c.weekBatch || '', callNotes: c.callNotes, notes: c.notes,
     });
@@ -342,10 +345,12 @@ export default function ContactsPage() {
 
   async function handleSave() {
     if (!form.firstName.trim()) return;
+    const ageNum = form.age ? parseInt(form.age, 10) : undefined;
     const data = {
       firstName: form.firstName, lastName: form.lastName,
       company: form.company, sector: form.sector,
       city: form.city, email: form.email, phone: form.phone,
+      age: ageNum && !isNaN(ageNum) ? ageNum : undefined,
       siteStatus: form.siteStatus, prospectStatus: form.prospectStatus,
       weekBatch: form.weekBatch || undefined,
       callNotes: form.callNotes, notes: form.notes,
@@ -763,8 +768,9 @@ export default function ContactsPage() {
                     </div>
                   );
                 })()}
-                <div style={{ fontSize: 10, color: 'var(--text-subtle)', marginTop: 4 }}>
-                  Ajouté le {format(new Date(selected.createdAt), 'd MMM yyyy', { locale: fr })}
+                <div style={{ fontSize: 10, color: 'var(--text-subtle)', marginTop: 4, display: 'flex', gap: 10 }}>
+                  <span>Ajouté le {format(new Date(selected.createdAt), 'd MMM yyyy', { locale: fr })}</span>
+                  {selected.age && <span>· {selected.age} ans</span>}
                 </div>
               </div>
             )}
@@ -877,9 +883,10 @@ export default function ContactsPage() {
               <div><label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Secteur</label><select style={inp} value={form.sector} onChange={e => setForm(f => ({ ...f, sector: e.target.value as BusinessSector }))}>{ALL_SECTORS.map(s => <option key={s} value={s}>{SECTOR_LABELS[s]}</option>)}</select></div>
               <div><label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Site existant</label><select style={inp} value={form.siteStatus} onChange={e => setForm(f => ({ ...f, siteStatus: e.target.value as SiteStatus }))}>{ALL_SITE_STATUSES.map(s => <option key={s} value={s}>{SITE_STATUS_LABELS[s]}</option>)}</select></div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
               <div><label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Statut appel</label><select style={inp} value={form.prospectStatus} onChange={e => setForm(f => ({ ...f, prospectStatus: e.target.value as ProspectStatus }))}>{ALL_PROSPECT_STATUSES.map(s => <option key={s} value={s}>{PROSPECT_STATUS_LABELS[s]}</option>)}</select></div>
               <div><label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Lot semaine</label><input style={inp} value={form.weekBatch} onChange={e => setForm(f => ({ ...f, weekBatch: e.target.value }))} placeholder="S23-2026" /></div>
+              <div><label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Âge</label><input style={inp} type="number" min={18} max={99} value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))} placeholder="45" /></div>
             </div>
             <div style={{ marginBottom: 10 }}><label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Notes appel</label><textarea style={{ ...inp, resize: 'vertical', minHeight: 64, lineHeight: 1.5 }} value={form.callNotes} onChange={e => setForm(f => ({ ...f, callNotes: e.target.value }))} placeholder="Résumé de l'appel, objections..." /></div>
             <div style={{ marginBottom: 20 }}><label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Notes internes</label><textarea style={{ ...inp, resize: 'vertical', minHeight: 50, lineHeight: 1.5 }} value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Autres infos..." /></div>

@@ -39,6 +39,7 @@ export interface Contact {
   callNotes: string;
   notes: string;
   source?: LeadSource;
+  age?: number;            // âge du dirigeant
   score?: number;          // score IA (1-100)
   niveau?: string;         // "CHAUD" | "TIÈDE" | "FROID"
   buyingSignals?: string;  // signaux d'achat
