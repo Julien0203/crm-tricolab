@@ -28,15 +28,22 @@ export interface Contact {
   lastName: string;
   company: string;
   sector: BusinessSector;
+  sectorLabel?: string;    // secteur libre importé CSV (ex: "Maçonnerie", "Couverture")
   city: string;
   email: string;
   phone: string;
   siteStatus: SiteStatus;
+  siteUrl?: string;        // URL ou "Inexistant" importé du CSV
   prospectStatus: ProspectStatus;
   weekBatch?: string;      // ex: "S22-2026" (semaine de réception de la liste Clara)
   callNotes: string;
   notes: string;
   source?: LeadSource;
+  score?: number;          // score IA (1-100)
+  niveau?: string;         // "CHAUD" | "TIÈDE" | "FROID"
+  buyingSignals?: string;  // signaux d'achat
+  prospectSummary?: string; // résumé prospect
+  recommendedAction?: string; // action recommandée
   createdAt: string;
   updatedAt: string;
 }

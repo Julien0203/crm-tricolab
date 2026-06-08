@@ -32,6 +32,13 @@ const FIELD_ALIASES: Record<string, string[]> = {
   phone: ['telephone', 'tel', 'phone', 'mobile', 'portable', 'gsm', 'numero', 'num tel'],
   city: ['ville', 'city', 'commune', 'localite'],
   email: ['email', 'mail', 'e-mail', 'courriel', 'adresse email', 'adresse mail'],
+  score: ['score'],
+  niveau: ['niveau', 'temperature', 'chaleur', 'niveau prospect'],
+  siteUrl: ['site web', 'site', 'url', 'website', 'site internet', 'adresse site'],
+  sectorLabel: ['secteur', 'secteur activite', "secteur d activite", 'domaine', 'domaine activite', 'metier'],
+  buyingSignals: ["signaux d achat", 'signaux achat', 'buying signals', 'signaux'],
+  prospectSummary: ['resume prospect', 'resume', 'description prospect', 'description', 'profil'],
+  recommendedAction: ['action recommandee', 'action', 'prochaine action', 'next action', 'recommandation'],
 };
 
 function autoDetectMapping(headers: string[]): Record<string, number> {
@@ -241,6 +248,27 @@ export default function ContactsPage() {
           firstName = parts[0];
           lastName = parts.slice(1).join(' ');
         }
+
+        // Site Web → siteStatus + siteUrl
+        const siteWebRaw = get(row, 'siteUrl');
+        let siteStatus: SiteStatus = 'inconnu';
+        let siteUrl: string | undefined;
+        if (siteWebRaw) {
+          const lower = siteWebRaw.toLowerCase();
+          if (lower === 'inexistant' || lower === 'aucun' || lower === 'non') {
+            siteStatus = 'aucun';
+          } else if (siteWebRaw.startsWith('http')) {
+            siteStatus = 'existant';
+            siteUrl = siteWebRaw;
+          } else {
+            siteUrl = siteWebRaw;
+          }
+        }
+
+        // Score
+        const scoreRaw = get(row, 'score');
+        const score = scoreRaw ? parseInt(scoreRaw, 10) : undefined;
+
         return {
           firstName: firstName || 'Inconnu',
           lastName,
@@ -249,12 +277,19 @@ export default function ContactsPage() {
           city: get(row, 'city'),
           email: get(row, 'email'),
           sector: 'autre' as BusinessSector,
-          siteStatus: 'inconnu' as SiteStatus,
+          sectorLabel: get(row, 'sectorLabel') || undefined,
+          siteStatus,
+          siteUrl,
           prospectStatus: 'a-appeler' as ProspectStatus,
           weekBatch: csvBatch || undefined,
           callNotes: '',
           notes: '',
           source: 'appel_froid' as const,
+          score: isNaN(score as number) ? undefined : score,
+          niveau: get(row, 'niveau') || undefined,
+          buyingSignals: get(row, 'buyingSignals') || undefined,
+          prospectSummary: get(row, 'prospectSummary') || undefined,
+          recommendedAction: get(row, 'recommendedAction') || undefined,
         };
       })
       .filter(c => c.firstName !== 'Inconnu' || c.company);
@@ -649,13 +684,50 @@ export default function ContactsPage() {
                   </div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                  {[{ label: 'Secteur', value: SECTOR_LABELS[selected.sector] }, { label: 'Site existant', value: SITE_STATUS_LABELS[selected.siteStatus] }].map(({ label, value }) => (
+                  {[
+                    { label: 'Secteur', value: selected.sectorLabel || SECTOR_LABELS[selected.sector] },
+                    { label: 'Site existant', value: selected.siteUrl || SITE_STATUS_LABELS[selected.siteStatus] },
+                  ].map(({ label, value }) => (
                     <div key={label} style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
                       <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>{label}</div>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{value}</div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', wordBreak: 'break-all' }}>{value}</div>
                     </div>
                   ))}
                 </div>
+                {(selected.score !== undefined || selected.niveau) && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                    {selected.score !== undefined && (
+                      <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Score IA</div>
+                        <div style={{ fontSize: 16, fontWeight: 700, color: selected.score >= 75 ? '#10b981' : selected.score >= 50 ? '#f59e0b' : '#ef4444' }}>{selected.score}<span style={{ fontSize: 10, fontWeight: 400, color: 'var(--text-muted)' }}>/100</span></div>
+                      </div>
+                    )}
+                    {selected.niveau && (
+                      <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Niveau</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: selected.niveau === 'CHAUD' ? '#ef4444' : selected.niveau === 'TIÈDE' ? '#f59e0b' : '#6366f1' }}>{selected.niveau}</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {selected.buyingSignals && (
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Signaux d&apos;Achat</div>
+                    <div style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.18)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selected.buyingSignals}</div>
+                  </div>
+                )}
+                {selected.prospectSummary && (
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Résumé Prospect</div>
+                    <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selected.prospectSummary}</div>
+                  </div>
+                )}
+                {selected.recommendedAction && (
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Action Recommandée</div>
+                    <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.22)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selected.recommendedAction}</div>
+                  </div>
+                )}
                 {selected.callNotes && (
                   <div>
                     <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Notes appel</div>
@@ -833,7 +905,7 @@ export default function ContactsPage() {
 
             {/* Column mapping */}
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Correspondance des colonnes</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Champs principaux</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 {[
                   { field: 'firstName', label: 'Prénom / Nom complet' },
@@ -842,6 +914,34 @@ export default function ContactsPage() {
                   { field: 'phone', label: 'Téléphone' },
                   { field: 'city', label: 'Ville' },
                   { field: 'email', label: 'Email' },
+                ].map(({ field, label }) => (
+                  <div key={field}>
+                    <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 3 }}>{label}</label>
+                    <select
+                      value={csvMapping[field] ?? -1}
+                      onChange={e => setCsvMapping(m => ({ ...m, [field]: Number(e.target.value) }))}
+                      style={{ ...inp, padding: '6px 8px', fontSize: 12 }}
+                    >
+                      <option value={-1}>— Non importé</option>
+                      {csvHeaders.map((h, i) => <option key={i} value={i}>{h || `Colonne ${i + 1}`}</option>)}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Extended mapping */}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Champs enrichis (IA / qualification)</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                {[
+                  { field: 'sectorLabel', label: 'Secteur' },
+                  { field: 'siteUrl', label: 'Site Web' },
+                  { field: 'score', label: 'Score (1–100)' },
+                  { field: 'niveau', label: 'Niveau (CHAUD / TIÈDE / FROID)' },
+                  { field: 'buyingSignals', label: "Signaux d'Achat" },
+                  { field: 'prospectSummary', label: 'Résumé Prospect' },
+                  { field: 'recommendedAction', label: 'Action Recommandée' },
                 ].map(({ field, label }) => (
                   <div key={field}>
                     <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 3 }}>{label}</label>
