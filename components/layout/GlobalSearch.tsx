@@ -42,12 +42,10 @@ export default function GlobalSearch() {
     if (open) { setTimeout(() => inputRef.current?.focus(), 50); setQuery(''); }
   }, [open]);
 
-  const search = useCallback((q: string) => {
+  const search = useCallback(async (q: string) => {
     if (!q.trim()) { setResults([]); return; }
     const lower = q.toLowerCase();
-    const contacts = getContacts();
-    const deals = getDeals();
-    const activities = getActivities();
+    const [contacts, deals, activities] = await Promise.all([getContacts(), getDeals(), getActivities()]);
 
     const res: Result[] = [];
 

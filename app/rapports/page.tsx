@@ -316,7 +316,7 @@ export default function RapportsPage() {
                   {Object.entries(grouped).sort((a, b) => b[1] - a[1]).map(([reason, count]) => (
                     <div key={reason}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                        <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{LOST_REASON_LABELS[reason] || reason}</span>
+                        <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{LOST_REASON_LABELS[reason as keyof typeof LOST_REASON_LABELS] || reason}</span>
                         <span style={{ fontSize: 11, fontWeight: 700, color: '#ef4444' }}>{count}</span>
                       </div>
                       <div style={{ height: 5, background: 'var(--border-light)', borderRadius: 3, overflow: 'hidden' }}>

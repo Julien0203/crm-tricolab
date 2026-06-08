@@ -211,7 +211,7 @@ export default function DashboardPage() {
                   </Pie>
                   <Tooltip
                     contentStyle={{ background: 'var(--glass-bg-solid)', border: '1px solid var(--glass-border)', borderRadius: 8, fontSize: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
-                    formatter={(v: number, name: string) => [v, name]}
+                    formatter={(v, name) => [v, name]}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -338,7 +338,7 @@ export default function DashboardPage() {
               <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{ background: 'var(--glass-bg-solid)', border: '1px solid var(--glass-border)', borderRadius: 8, fontSize: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
-                formatter={(v: number) => [`${v}€`, 'Commission']}
+                formatter={(v) => [`${v}€`, 'Commission']}
               />
               <Area type="monotone" dataKey="commission" stroke="#10b981" strokeWidth={2} fill="url(#commGrad)" dot={{ r: 3, fill: '#10b981', strokeWidth: 0 }} activeDot={{ r: 5 }} />
             </AreaChart>
