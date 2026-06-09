@@ -733,9 +733,6 @@ export default function ContactsPage() {
               const bloc = (label: string) => (
                 <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', paddingBottom: 6, borderBottom: '1px solid var(--border-subtle)', marginBottom: 6 }}>{label}</div>
               );
-              const scoreColor = selected.score !== undefined
-                ? (selected.score >= 70 ? '#ef4444' : selected.score >= 50 ? '#f59e0b' : '#6366f1')
-                : 'var(--text-subtle)';
               const niveauColor = selected.niveau === 'CHAUD' ? '#ef4444' : selected.niveau === 'TIÈDE' ? '#f59e0b' : '#6366f1';
               const socialLinks = [
                 { key: 'googleBusiness' as const, label: 'Google', color: '#4285F4' },
@@ -781,18 +778,6 @@ export default function ContactsPage() {
                   {/* Bloc Dirigeant */}
                   <div>
                     {bloc('Dirigeant')}
-                    {/* Score priorité — affiché en évidence */}
-                    <div style={{ background: selected.score !== undefined ? `${scoreColor}10` : 'var(--input-bg)', border: `1px solid ${selected.score !== undefined ? scoreColor + '30' : 'var(--border-subtle)'}`, borderRadius: 8, padding: '10px 12px', marginBottom: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div>
-                        <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Score Priorité</div>
-                        {selected.score !== undefined
-                          ? <div style={{ fontSize: 24, fontWeight: 800, color: scoreColor, lineHeight: 1 }}>{selected.score}<span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}>/100</span></div>
-                          : <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-subtle)' }}>—</div>}
-                      </div>
-                      {selected.niveau && (
-                        <span style={{ fontSize: 11, fontWeight: 700, color: niveauColor, background: `${niveauColor}15`, border: `1px solid ${niveauColor}30`, borderRadius: 20, padding: '3px 9px' }}>{selected.niveau}</span>
-                      )}
-                    </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                       {cell('Âge du Dirigeant', selected.age ? `${selected.age} ans` : '—')}
                       {cell('Niveau', selected.niveau
