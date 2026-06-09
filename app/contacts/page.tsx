@@ -307,7 +307,6 @@ export default function ContactsPage() {
           weekBatch: csvBatch || undefined,
           callNotes: '',
           notes: '',
-          source: 'appel_froid' as const,
           // Entreprise
           siren:       get(row, 'siren')       || undefined,
           yearCreated: get(row, 'yearCreated') || undefined,
@@ -332,7 +331,15 @@ export default function ContactsPage() {
       })
       .filter(c => c.firstName !== 'Inconnu' || c.company);
 
-    await saveContacts(toImport);
+    if (toImport.length === 0) {
+      alert('Aucun prospect valide détecté. Vérifiez le mapping des colonnes (Prénom ou Entreprise requis).');
+      return;
+    }
+    const saved = await saveContacts(toImport);
+    if (saved.length === 0) {
+      alert(`Erreur lors de l'import Supabase. Vérifiez la console pour les détails.`);
+      return;
+    }
     await reload();
     setShowCsvModal(false);
   }

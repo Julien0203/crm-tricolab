@@ -70,11 +70,11 @@ function contactToDb(c: Partial<Contact>): Record<string, unknown> {
   if ('callNotes'      in c) r.call_notes       = c.callNotes;
   if ('notes'          in c) r.notes            = c.notes;
   if ('source'         in c) r.source           = c.source;
-  // Build meta object if any enriched field is present
-  if (META_FIELDS.some(f => f in c)) {
+  // Build meta object only when at least one enriched field has a non-undefined value
+  if (META_FIELDS.some(f => f in c && c[f as keyof Contact] !== undefined)) {
     const meta: Record<string, unknown> = {};
     for (const f of META_FIELDS) {
-      if (f in c) meta[f] = c[f as keyof Contact];
+      if (f in c && c[f as keyof Contact] !== undefined) meta[f] = c[f as keyof Contact];
     }
     r.meta = meta;
   }
