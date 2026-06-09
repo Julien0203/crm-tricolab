@@ -733,7 +733,7 @@ export default function ContactsPage() {
               const bloc = (label: string) => (
                 <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', paddingBottom: 6, borderBottom: '1px solid var(--border-subtle)', marginBottom: 6 }}>{label}</div>
               );
-              const niveauColor = selected.niveau === 'CHAUD' ? '#ef4444' : selected.niveau === 'TIÈDE' ? '#f59e0b' : '#6366f1';
+
               const socialLinks = [
                 { key: 'googleBusiness' as const, label: 'Google', color: '#4285F4' },
                 { key: 'instagram'      as const, label: 'Instagram', color: '#E1306C' },
@@ -780,9 +780,7 @@ export default function ContactsPage() {
                     {bloc('Dirigeant')}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                       {cell('Âge du Dirigeant', selected.age ? `${selected.age} ans` : '—')}
-                      {cell('Niveau', selected.niveau
-                        ? <span style={{ color: niveauColor, fontWeight: 700 }}>{selected.niveau}</span>
-                        : '—')}
+
                       {cell('Lot semaine', selected.weekBatch || '—')}
                     </div>
                   </div>
