@@ -14,7 +14,7 @@ import { buildTimeline, formatCurrency } from '@/lib/intelligence';
 import {
   Plus, Search, Phone, Mail, Pencil, Trash2, X,
   Users, ChevronRight, TrendingUp, Clock, Check,
-  MapPin, Globe, ChevronDown, ChevronUp, Upload,
+  MapPin, Globe, ChevronDown, ChevronUp, Upload, ExternalLink,
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -26,18 +26,33 @@ function norm(s: string) {
 }
 
 const FIELD_ALIASES: Record<string, string[]> = {
-  firstName: ['prenom', 'first name', 'firstname', 'first_name', 'dirigeant', 'contact', 'interlocuteur', 'nom prenom', 'nom complet', 'nom/prenom'],
-  lastName: ['nom', 'last name', 'lastname', 'last_name', 'nom de famille'],
-  company: ['entreprise', 'societe', 'company', 'raison sociale', 'nom entreprise', 'enseigne', 'commerce', 'etablissement'],
-  phone: ['telephone', 'tel', 'phone', 'mobile', 'portable', 'gsm', 'numero', 'num tel'],
-  city: ['ville', 'city', 'commune', 'localite'],
-  email: ['email', 'mail', 'e-mail', 'courriel', 'adresse email', 'adresse mail'],
-  score: ['score'],
-  niveau: ['niveau', 'temperature', 'chaleur', 'niveau prospect'],
-  siteUrl: ['site web', 'site', 'url', 'website', 'site internet', 'adresse site'],
-  sectorLabel: ['secteur', 'secteur activite', "secteur d activite", 'domaine', 'domaine activite', 'metier'],
-  buyingSignals: ["signaux d achat", 'signaux achat', 'buying signals', 'signaux'],
-  prospectSummary: ['resume prospect', 'resume', 'description prospect', 'description', 'profil'],
+  firstName:         ['prenom', 'first name', 'firstname', 'first_name', 'dirigeant', 'contact', 'interlocuteur', 'nom prenom', 'nom complet', 'nom/prenom'],
+  lastName:          ['nom', 'last name', 'lastname', 'last_name', 'nom de famille'],
+  company:           ['entreprise', 'societe', 'company', 'raison sociale', 'nom entreprise', 'enseigne', 'commerce', 'etablissement'],
+  phone:             ['telephone', 'tel', 'phone', 'mobile', 'portable', 'gsm', 'numero', 'num tel'],
+  city:              ['ville', 'city', 'commune', 'localite'],
+  email:             ['email', 'mail', 'e-mail', 'courriel', 'adresse email', 'adresse mail'],
+  // Entreprise
+  siren:             ['siren', 'n siren', 'numero siren'],
+  yearCreated:       ['annee creation', 'annee de creation', 'date creation', 'annee fondation', 'creation'],
+  employees:         ['nb salaries', 'nb employes', 'employes', 'salaries', 'effectif', 'nombre salaries', 'nombre employes'],
+  department:        ['departement', 'dept', 'dep', 'departement entreprise'],
+  // Dirigeant
+  age:               ['age dirigeant', 'age du dirigeant', 'age', 'age gerant'],
+  score:             ['score priorite', 'score', 'priorite'],
+  niveau:            ['niveau', 'temperature', 'chaleur', 'niveau prospect'],
+  // Présence en ligne
+  siteUrl:           ['site web', 'site', 'url', 'website', 'site internet', 'adresse site'],
+  googleBusiness:    ['google business', 'google my business', 'gmb', 'fiche google'],
+  instagram:         ['instagram', 'insta', 'instagram url'],
+  facebook:          ['facebook', 'fb', 'facebook url'],
+  linkedin:          ['linkedin', 'linkedin url'],
+  pappers:           ['pappers', 'pappers url', 'fiche pappers'],
+  scoreSite:         ['score site', 'score site /10', 'note site', 'qualite site'],
+  // Prospection
+  sectorLabel:       ['secteur', 'secteur activite', "secteur d activite", 'domaine', 'domaine activite', 'metier'],
+  buyingSignals:     ["signaux d achat", 'signaux achat', 'buying signals', 'signaux'],
+  prospectSummary:   ['resume prospect', 'resume', 'description prospect', 'description', 'profil'],
   recommendedAction: ['action recommandee', 'action', 'prochaine action', 'next action', 'recommandation'],
 };
 
@@ -271,6 +286,12 @@ export default function ContactsPage() {
         const scoreRaw = get(row, 'score');
         const score = scoreRaw ? parseInt(scoreRaw, 10) : undefined;
 
+        // Numeric fields
+        const ageRaw = get(row, 'age');
+        const ageNum = ageRaw ? parseInt(ageRaw, 10) : undefined;
+        const scoreSiteRaw = get(row, 'scoreSite');
+        const scoreSiteNum = scoreSiteRaw ? parseFloat(scoreSiteRaw) : undefined;
+
         return {
           firstName: firstName || 'Inconnu',
           lastName,
@@ -287,10 +308,25 @@ export default function ContactsPage() {
           callNotes: '',
           notes: '',
           source: 'appel_froid' as const,
+          // Entreprise
+          siren:       get(row, 'siren')       || undefined,
+          yearCreated: get(row, 'yearCreated') || undefined,
+          employees:   get(row, 'employees')   || undefined,
+          department:  get(row, 'department')  || undefined,
+          // Dirigeant
+          age:   ageNum && !isNaN(ageNum) ? ageNum : undefined,
           score: isNaN(score as number) ? undefined : score,
           niveau: get(row, 'niveau') || undefined,
-          buyingSignals: get(row, 'buyingSignals') || undefined,
-          prospectSummary: get(row, 'prospectSummary') || undefined,
+          // Présence en ligne
+          googleBusiness: get(row, 'googleBusiness') || undefined,
+          instagram:      get(row, 'instagram')      || undefined,
+          facebook:       get(row, 'facebook')       || undefined,
+          linkedin:       get(row, 'linkedin')       || undefined,
+          pappers:        get(row, 'pappers')        || undefined,
+          scoreSite: scoreSiteNum && !isNaN(scoreSiteNum) ? scoreSiteNum : undefined,
+          // Prospection
+          buyingSignals:     get(row, 'buyingSignals')     || undefined,
+          prospectSummary:   get(row, 'prospectSummary')   || undefined,
           recommendedAction: get(row, 'recommendedAction') || undefined,
         };
       })
@@ -680,121 +716,183 @@ export default function ContactsPage() {
 
           {/* Content */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px' }}>
-            {activeTab === 'info' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {/* Contact: always shown */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-                    <Phone size={13} color={selected.phone ? '#6366f1' : 'var(--text-subtle)'} style={{ flexShrink: 0 }} />
-                    {selected.phone
-                      ? <a href={`tel:${selected.phone}`} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>{selected.phone}</a>
-                      : <span style={{ color: 'var(--text-subtle)', fontStyle: 'italic' }}>Non renseigné</span>}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-                    <Mail size={13} color={selected.email ? '#6366f1' : 'var(--text-subtle)'} style={{ flexShrink: 0 }} />
-                    {selected.email
-                      ? <a href={`mailto:${selected.email}`} style={{ color: 'var(--text-secondary)', textDecoration: 'none', wordBreak: 'break-all' }}>{selected.email}</a>
-                      : <span style={{ color: 'var(--text-subtle)', fontStyle: 'italic' }}>Non renseigné</span>}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-secondary)', fontSize: 12 }}>
-                    <MapPin size={13} color="#6366f1" style={{ flexShrink: 0 }} />{selected.city || '—'}
-                  </div>
+            {activeTab === 'info' && (() => {
+              const cell = (label: string, value: React.ReactNode, span?: boolean) => (
+                <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 7, padding: '8px 9px', ...(span ? { gridColumn: '1 / -1' } : {}) }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>{label}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', wordBreak: 'break-word' }}>{value}</div>
                 </div>
+              );
+              const bloc = (label: string) => (
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', paddingBottom: 6, borderBottom: '1px solid var(--border-subtle)', marginBottom: 6 }}>{label}</div>
+              );
+              const scoreColor = selected.score !== undefined
+                ? (selected.score >= 70 ? '#ef4444' : selected.score >= 50 ? '#f59e0b' : '#6366f1')
+                : 'var(--text-subtle)';
+              const niveauColor = selected.niveau === 'CHAUD' ? '#ef4444' : selected.niveau === 'TIÈDE' ? '#f59e0b' : '#6366f1';
+              const socialLinks = [
+                { key: 'googleBusiness' as const, label: 'Google', color: '#4285F4' },
+                { key: 'instagram'      as const, label: 'Instagram', color: '#E1306C' },
+                { key: 'facebook'       as const, label: 'Facebook', color: '#1877F2' },
+                { key: 'linkedin'       as const, label: 'LinkedIn', color: '#0A66C2' },
+                { key: 'pappers'        as const, label: 'Pappers', color: '#6366f1' },
+              ];
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-                {/* Qualification grid: 3 rows × 2 cols, toujours visible */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                  <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Secteur</div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', wordBreak: 'break-word' }}>{selected.sectorLabel || SECTOR_LABELS[selected.sector]}</div>
-                  </div>
-                  <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Site existant</div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', wordBreak: 'break-all' }}>{selected.siteUrl || SITE_STATUS_LABELS[selected.siteStatus]}</div>
-                  </div>
-                  <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Âge</div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: selected.age ? 'var(--text-primary)' : 'var(--text-subtle)' }}>{selected.age ? `${selected.age} ans` : '—'}</div>
-                  </div>
-                  <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Score IA</div>
-                    {selected.score !== undefined
-                      ? <div style={{ fontSize: 16, fontWeight: 700, color: selected.score >= 75 ? '#10b981' : selected.score >= 50 ? '#f59e0b' : '#ef4444' }}>{selected.score}<span style={{ fontSize: 10, fontWeight: 400, color: 'var(--text-muted)' }}>/100</span></div>
-                      : <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-subtle)' }}>—</div>}
-                  </div>
-                  <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Niveau</div>
-                    {selected.niveau
-                      ? <div style={{ fontSize: 12, fontWeight: 700, color: selected.niveau === 'CHAUD' ? '#ef4444' : selected.niveau === 'TIÈDE' ? '#f59e0b' : '#6366f1' }}>{selected.niveau}</div>
-                      : <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-subtle)' }}>—</div>}
-                  </div>
-                  <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 10px' }}>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Lot semaine</div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: selected.weekBatch ? 'var(--text-primary)' : 'var(--text-subtle)' }}>{selected.weekBatch || '—'}</div>
-                  </div>
-                </div>
-
-                {/* IA Insights: uniquement si données présentes */}
-                {selected.buyingSignals && (
-                  <div>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Signaux d&apos;Achat</div>
-                    <div style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.18)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selected.buyingSignals}</div>
-                  </div>
-                )}
-                {selected.prospectSummary && (
-                  <div>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Résumé Prospect</div>
-                    <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selected.prospectSummary}</div>
-                  </div>
-                )}
-                {selected.recommendedAction && (
-                  <div>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Action Recommandée</div>
-                    <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.22)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selected.recommendedAction}</div>
-                  </div>
-                )}
-
-                {/* Notes appel: toujours visible */}
-                <div>
-                  <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Notes appel</div>
-                  <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: selected.callNotes ? 'var(--text-secondary)' : 'var(--text-subtle)', lineHeight: 1.6, fontStyle: selected.callNotes ? 'normal' : 'italic' }}>
-                    {selected.callNotes || 'Aucune note d\'appel'}
-                  </div>
-                </div>
-
-                {selected.notes && (
-                  <div>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Notes internes</div>
-                    <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selected.notes}</div>
-                  </div>
-                )}
-                {(() => {
-                  const deals = allDeals.filter(d => d.contactId === selected.id);
-                  if (!deals.length) return null;
-                  return (
-                    <div>
-                      <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Deals</div>
-                      {deals.map(deal => (
-                        <div key={deal.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-                          <div>
-                            <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>{deal.title}</div>
-                            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{DEAL_STAGE_LABELS[deal.stage]}</div>
-                          </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: 12, fontWeight: 700, color: deal.stage === 'signe' ? '#10b981' : 'var(--text-primary)' }}>
-                              {deal.stage === 'signe' ? `+${deal.commission}€` : `${deal.value}€`}
-                            </div>
-                            {deal.stage === 'signe' && <div style={{ fontSize: 9, color: '#10b981' }}>commission</div>}
-                          </div>
-                        </div>
-                      ))}
+                  {/* Contact */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+                      <Phone size={13} color={selected.phone ? '#6366f1' : 'var(--text-subtle)'} style={{ flexShrink: 0 }} />
+                      {selected.phone
+                        ? <a href={`tel:${selected.phone}`} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>{selected.phone}</a>
+                        : <span style={{ color: 'var(--text-subtle)', fontStyle: 'italic' }}>Non renseigné</span>}
                     </div>
-                  );
-                })()}
-                <div style={{ fontSize: 10, color: 'var(--text-subtle)', marginTop: 4 }}>
-                  Ajouté le {format(new Date(selected.createdAt), 'd MMM yyyy', { locale: fr })}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+                      <Mail size={13} color={selected.email ? '#6366f1' : 'var(--text-subtle)'} style={{ flexShrink: 0 }} />
+                      {selected.email
+                        ? <a href={`mailto:${selected.email}`} style={{ color: 'var(--text-secondary)', textDecoration: 'none', wordBreak: 'break-all' }}>{selected.email}</a>
+                        : <span style={{ color: 'var(--text-subtle)', fontStyle: 'italic' }}>Non renseigné</span>}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-secondary)', fontSize: 12 }}>
+                      <MapPin size={13} color="#6366f1" style={{ flexShrink: 0 }} />{selected.city || '—'}
+                    </div>
+                  </div>
+
+                  {/* Bloc Entreprise */}
+                  <div>
+                    {bloc('Entreprise')}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                      {cell('Secteur', selected.sectorLabel || SECTOR_LABELS[selected.sector], true)}
+                      {cell('SIREN', selected.siren || '—')}
+                      {cell('Année création', selected.yearCreated || '—')}
+                      {cell('Nb employés', selected.employees || '—')}
+                      {cell('Département', selected.department || '—')}
+                    </div>
+                  </div>
+
+                  {/* Bloc Dirigeant */}
+                  <div>
+                    {bloc('Dirigeant')}
+                    {/* Score priorité — affiché en évidence */}
+                    <div style={{ background: selected.score !== undefined ? `${scoreColor}10` : 'var(--input-bg)', border: `1px solid ${selected.score !== undefined ? scoreColor + '30' : 'var(--border-subtle)'}`, borderRadius: 8, padding: '10px 12px', marginBottom: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Score Priorité</div>
+                        {selected.score !== undefined
+                          ? <div style={{ fontSize: 24, fontWeight: 800, color: scoreColor, lineHeight: 1 }}>{selected.score}<span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}>/100</span></div>
+                          : <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-subtle)' }}>—</div>}
+                      </div>
+                      {selected.niveau && (
+                        <span style={{ fontSize: 11, fontWeight: 700, color: niveauColor, background: `${niveauColor}15`, border: `1px solid ${niveauColor}30`, borderRadius: 20, padding: '3px 9px' }}>{selected.niveau}</span>
+                      )}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                      {cell('Âge du Dirigeant', selected.age ? `${selected.age} ans` : '—')}
+                      {cell('Niveau', selected.niveau
+                        ? <span style={{ color: niveauColor, fontWeight: 700 }}>{selected.niveau}</span>
+                        : '—')}
+                      {cell('Lot semaine', selected.weekBatch || '—')}
+                    </div>
+                  </div>
+
+                  {/* Bloc Présence en ligne */}
+                  <div>
+                    {bloc('Présence en ligne')}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 8 }}>
+                      <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 7, padding: '8px 9px' }}>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Site existant</div>
+                        {selected.siteUrl
+                          ? <a href={selected.siteUrl} target="_blank" rel="noreferrer" style={{ fontSize: 11, fontWeight: 600, color: '#10b981', textDecoration: 'none', wordBreak: 'break-all', display: 'flex', alignItems: 'center', gap: 3 }}><Globe size={10} />Voir le site</a>
+                          : <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{SITE_STATUS_LABELS[selected.siteStatus]}</div>}
+                      </div>
+                      {cell('Score site /10', selected.scoreSite !== undefined ? <span style={{ color: selected.scoreSite >= 7 ? '#10b981' : selected.scoreSite >= 5 ? '#f59e0b' : '#ef4444' }}>{selected.scoreSite}/10</span> : '—')}
+                    </div>
+                    {/* Liens sociaux */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                      {socialLinks.map(({ key, label, color }) => {
+                        const url = selected[key];
+                        return url
+                          ? <a key={key} href={url} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color, background: `${color}12`, border: `1px solid ${color}30`, borderRadius: 20, padding: '3px 9px', textDecoration: 'none' }}><ExternalLink size={9} />{label}</a>
+                          : <span key={key} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-subtle)', background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 20, padding: '3px 9px' }}>{label}</span>;
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Bloc Prospection — toujours visible */}
+                  <div>
+                    {bloc('Prospection')}
+                    {/* Signaux d'achat */}
+                    <div style={{ marginBottom: 8 }}>
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Signaux d&apos;Achat</div>
+                      {selected.buyingSignals
+                        ? <div style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.18)', borderRadius: 8, padding: '9px 11px' }}>
+                            <ul style={{ margin: 0, paddingLeft: 14, listStyle: 'disc' }}>
+                              {selected.buyingSignals.split('·').map((s, i) => s.trim() && (
+                                <li key={i} style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{s.trim()}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        : <div style={{ fontSize: 12, fontStyle: 'italic', color: 'var(--text-subtle)' }}>—</div>}
+                    </div>
+                    {/* Résumé prospect */}
+                    <div style={{ marginBottom: 8 }}>
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Résumé Prospect</div>
+                      {selected.prospectSummary
+                        ? <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 8, padding: '9px 11px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.65 }}>{selected.prospectSummary}</div>
+                        : <div style={{ fontSize: 12, fontStyle: 'italic', color: 'var(--text-subtle)' }}>—</div>}
+                    </div>
+                    {/* Action recommandée */}
+                    <div>
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Action Recommandée</div>
+                      {selected.recommendedAction
+                        ? <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.22)', borderRadius: 8, padding: '9px 11px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.65 }}>{selected.recommendedAction}</div>
+                        : <div style={{ fontSize: 12, fontStyle: 'italic', color: 'var(--text-subtle)' }}>—</div>}
+                    </div>
+                  </div>
+
+                  {/* Notes appel: toujours visible */}
+                  <div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Notes appel</div>
+                    <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: selected.callNotes ? 'var(--text-secondary)' : 'var(--text-subtle)', lineHeight: 1.6, fontStyle: selected.callNotes ? 'normal' : 'italic' }}>
+                      {selected.callNotes || 'Aucune note d\'appel'}
+                    </div>
+                  </div>
+
+                  {selected.notes && (
+                    <div>
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Notes internes</div>
+                      <div style={{ background: 'var(--input-bg)', border: '1px solid var(--border-subtle)', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selected.notes}</div>
+                    </div>
+                  )}
+                  {(() => {
+                    const deals = allDeals.filter(d => d.contactId === selected.id);
+                    if (!deals.length) return null;
+                    return (
+                      <div>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Deals</div>
+                        {deals.map(deal => (
+                          <div key={deal.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                            <div>
+                              <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>{deal.title}</div>
+                              <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{DEAL_STAGE_LABELS[deal.stage]}</div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontSize: 12, fontWeight: 700, color: deal.stage === 'signe' ? '#10b981' : 'var(--text-primary)' }}>
+                                {deal.stage === 'signe' ? `+${deal.commission}€` : `${deal.value}€`}
+                              </div>
+                              {deal.stage === 'signe' && <div style={{ fontSize: 9, color: '#10b981' }}>commission</div>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                  <div style={{ fontSize: 10, color: 'var(--text-subtle)', marginTop: 4 }}>
+                    Ajouté le {format(new Date(selected.createdAt), 'd MMM yyyy', { locale: fr })}
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {activeTab === 'script' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -958,26 +1056,84 @@ export default function ContactsPage() {
               </div>
             </div>
 
-            {/* Extended mapping */}
+            {/* Entreprise */}
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Champs enrichis (IA / qualification)</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Entreprise</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 {[
-                  { field: 'sectorLabel', label: 'Secteur' },
-                  { field: 'siteUrl', label: 'Site Web' },
-                  { field: 'score', label: 'Score (1–100)' },
+                  { field: 'sectorLabel', label: "Secteur d'activité" },
+                  { field: 'siren',       label: 'SIREN' },
+                  { field: 'yearCreated', label: 'Année de création' },
+                  { field: 'employees',   label: 'Nb salariés' },
+                  { field: 'department',  label: 'Département' },
+                ].map(({ field, label }) => (
+                  <div key={field}>
+                    <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 3 }}>{label}</label>
+                    <select value={csvMapping[field] ?? -1} onChange={e => setCsvMapping(m => ({ ...m, [field]: Number(e.target.value) }))} style={{ ...inp, padding: '6px 8px', fontSize: 12 }}>
+                      <option value={-1}>— Non importé</option>
+                      {csvHeaders.map((h, i) => <option key={i} value={i}>{h || `Colonne ${i + 1}`}</option>)}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Dirigeant */}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Dirigeant</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                {[
+                  { field: 'age',    label: 'Âge du Dirigeant' },
+                  { field: 'score',  label: 'Score Priorité (1-100)' },
                   { field: 'niveau', label: 'Niveau (CHAUD / TIÈDE / FROID)' },
-                  { field: 'buyingSignals', label: "Signaux d'Achat" },
-                  { field: 'prospectSummary', label: 'Résumé Prospect' },
+                  { field: 'siteUrl', label: 'Site Web' },
+                ].map(({ field, label }) => (
+                  <div key={field}>
+                    <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 3 }}>{label}</label>
+                    <select value={csvMapping[field] ?? -1} onChange={e => setCsvMapping(m => ({ ...m, [field]: Number(e.target.value) }))} style={{ ...inp, padding: '6px 8px', fontSize: 12 }}>
+                      <option value={-1}>— Non importé</option>
+                      {csvHeaders.map((h, i) => <option key={i} value={i}>{h || `Colonne ${i + 1}`}</option>)}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Présence en ligne */}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Présence en ligne</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                {[
+                  { field: 'googleBusiness', label: 'Google Business' },
+                  { field: 'instagram',      label: 'Instagram' },
+                  { field: 'facebook',       label: 'Facebook' },
+                  { field: 'linkedin',       label: 'LinkedIn' },
+                  { field: 'pappers',        label: 'Pappers' },
+                  { field: 'scoreSite',      label: 'Score Site (/10)' },
+                ].map(({ field, label }) => (
+                  <div key={field}>
+                    <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 3 }}>{label}</label>
+                    <select value={csvMapping[field] ?? -1} onChange={e => setCsvMapping(m => ({ ...m, [field]: Number(e.target.value) }))} style={{ ...inp, padding: '6px 8px', fontSize: 12 }}>
+                      <option value={-1}>— Non importé</option>
+                      {csvHeaders.map((h, i) => <option key={i} value={i}>{h || `Colonne ${i + 1}`}</option>)}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Prospection */}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Prospection</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                {[
+                  { field: 'buyingSignals',     label: "Signaux d'Achat" },
+                  { field: 'prospectSummary',   label: 'Résumé Prospect' },
                   { field: 'recommendedAction', label: 'Action Recommandée' },
                 ].map(({ field, label }) => (
                   <div key={field}>
                     <label style={{ fontSize: 11, color: 'var(--text-muted)', display: 'block', marginBottom: 3 }}>{label}</label>
-                    <select
-                      value={csvMapping[field] ?? -1}
-                      onChange={e => setCsvMapping(m => ({ ...m, [field]: Number(e.target.value) }))}
-                      style={{ ...inp, padding: '6px 8px', fontSize: 12 }}
-                    >
+                    <select value={csvMapping[field] ?? -1} onChange={e => setCsvMapping(m => ({ ...m, [field]: Number(e.target.value) }))} style={{ ...inp, padding: '6px 8px', fontSize: 12 }}>
                       <option value={-1}>— Non importé</option>
                       {csvHeaders.map((h, i) => <option key={i} value={i}>{h || `Colonne ${i + 1}`}</option>)}
                     </select>

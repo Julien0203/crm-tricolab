@@ -6,8 +6,16 @@ import {
 
 // ── Mappers camelCase ↔ snake_case ────────────────────────────────────────────
 
+const META_FIELDS = [
+  'sectorLabel', 'siteUrl', 'age', 'score', 'niveau',
+  'buyingSignals', 'prospectSummary', 'recommendedAction',
+  'siren', 'yearCreated', 'employees', 'department',
+  'googleBusiness', 'instagram', 'facebook', 'linkedin', 'pappers', 'scoreSite',
+] as const;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function dbToContact(r: any): Contact {
+  const meta: Record<string, unknown> = (r.meta && typeof r.meta === 'object') ? r.meta : {};
   return {
     id: r.id,
     firstName: r.first_name || '',
@@ -23,6 +31,25 @@ function dbToContact(r: any): Contact {
     callNotes: r.call_notes || '',
     notes: r.notes || '',
     source: r.source || 'appel_froid',
+    // enriched fields stored in JSONB meta column
+    sectorLabel:       meta.sectorLabel       as string | undefined,
+    siteUrl:           meta.siteUrl           as string | undefined,
+    age:               meta.age               as number | undefined,
+    score:             meta.score             as number | undefined,
+    niveau:            meta.niveau            as string | undefined,
+    buyingSignals:     meta.buyingSignals     as string | undefined,
+    prospectSummary:   meta.prospectSummary   as string | undefined,
+    recommendedAction: meta.recommendedAction as string | undefined,
+    siren:             meta.siren             as string | undefined,
+    yearCreated:       meta.yearCreated       as string | undefined,
+    employees:         meta.employees         as string | undefined,
+    department:        meta.department        as string | undefined,
+    googleBusiness:    meta.googleBusiness    as string | undefined,
+    instagram:         meta.instagram         as string | undefined,
+    facebook:          meta.facebook          as string | undefined,
+    linkedin:          meta.linkedin          as string | undefined,
+    pappers:           meta.pappers           as string | undefined,
+    scoreSite:         meta.scoreSite         as number | undefined,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
   };
@@ -43,6 +70,14 @@ function contactToDb(c: Partial<Contact>): Record<string, unknown> {
   if ('callNotes'      in c) r.call_notes       = c.callNotes;
   if ('notes'          in c) r.notes            = c.notes;
   if ('source'         in c) r.source           = c.source;
+  // Build meta object if any enriched field is present
+  if (META_FIELDS.some(f => f in c)) {
+    const meta: Record<string, unknown> = {};
+    for (const f of META_FIELDS) {
+      if (f in c) meta[f] = c[f as keyof Contact];
+    }
+    r.meta = meta;
+  }
   return r;
 }
 

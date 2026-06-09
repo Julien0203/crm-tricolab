@@ -39,9 +39,23 @@ export interface Contact {
   callNotes: string;
   notes: string;
   source?: LeadSource;
+  // Entreprise
+  siren?: string;
+  yearCreated?: string;
+  employees?: string;
+  department?: string;
+  // Dirigeant
   age?: number;            // âge du dirigeant
-  score?: number;          // score IA (1-100)
+  score?: number;          // score priorité (1-100)
   niveau?: string;         // "CHAUD" | "TIÈDE" | "FROID"
+  // Présence en ligne
+  googleBusiness?: string;
+  instagram?: string;
+  facebook?: string;
+  linkedin?: string;
+  pappers?: string;
+  scoreSite?: number;      // score site /10 (ex: 6.5)
+  // Prospection IA
   buyingSignals?: string;  // signaux d'achat
   prospectSummary?: string; // résumé prospect
   recommendedAction?: string; // action recommandée
