@@ -1,6 +1,7 @@
 // Statut du prospect (workflow cold call Thomas)
 export type ProspectStatus =
   | 'a-appeler'
+  | 'r1-planifie'
   | 'interesse'
   | 'r2-planifie'
   | 'non-interesse'
@@ -106,21 +107,23 @@ export interface CRMStore {
 
 // Labels affichage
 export const PROSPECT_STATUS_LABELS: Record<ProspectStatus, string> = {
-  'a-appeler': 'À appeler',
-  'interesse': 'Intéressé',
-  'r2-planifie': 'R2 planifié',
+  'a-appeler':    'À appeler',
+  'r1-planifie':  'R1 planifié',
+  'interesse':    'Intéressé',
+  'r2-planifie':  'R2 planifié',
   'non-interesse': 'Non intéressé',
-  'injoignable': 'Injoignable',
-  'chaud': 'Chaud',
+  'injoignable':  'Injoignable',
+  'chaud':        'Chaud',
 };
 
 export const PROSPECT_STATUS_COLORS: Record<ProspectStatus, string> = {
-  'a-appeler': 'rgba(60,60,67,0.40)',
-  'interesse': '#10b981',
-  'r2-planifie': '#6366f1',
+  'a-appeler':    'rgba(60,60,67,0.40)',
+  'r1-planifie':  '#8b5cf6',
+  'interesse':    '#10b981',
+  'r2-planifie':  '#6366f1',
   'non-interesse': '#ef4444',
-  'injoignable': '#f59e0b',
-  'chaud': '#f97316',
+  'injoignable':  '#f59e0b',
+  'chaud':        '#f97316',
 };
 
 export const SITE_STATUS_LABELS: Record<SiteStatus, string> = {
@@ -170,7 +173,7 @@ export const LOST_REASON_LABELS: Record<LostReason, string> = {
 
 export const ALL_SECTORS: BusinessSector[] = ['batiment', 'profession-liberale', 'restauration', 'commerce', 'coach-consultant', 'entrepreneur', 'autre'];
 export const ALL_SITE_STATUSES: SiteStatus[] = ['aucun', 'existant', 'vieux', 'inconnu'];
-export const ALL_PROSPECT_STATUSES: ProspectStatus[] = ['a-appeler', 'interesse', 'r2-planifie', 'non-interesse', 'injoignable', 'chaud'];
+export const ALL_PROSPECT_STATUSES: ProspectStatus[] = ['a-appeler', 'r1-planifie', 'interesse', 'r2-planifie', 'non-interesse', 'injoignable', 'chaud'];
 export const ALL_DEAL_STAGES: DealStage[] = ['r1', 'r2', 'devis-envoye', 'signe', 'perdu'];
 export const ALL_LEAD_SOURCES: LeadSource[] = ['linkedin', 'site_web', 'bouche_a_oreille', 'email_entrant', 'appel_froid', 'evenement', 'autre'];
 export const ALL_LOST_REASONS: LostReason[] = ['prix', 'concurrent', 'pas_de_budget', 'pas_de_decision', 'timing', 'besoin_non_confirme', 'autre'];
